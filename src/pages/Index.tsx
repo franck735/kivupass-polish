@@ -1,16 +1,45 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import TickerBar from "@/components/TickerBar";
+import FeaturesSection from "@/components/FeaturesSection";
+import EventsSection from "@/components/EventsSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import PartnersSection from "@/components/PartnersSection";
+import CTASection from "@/components/CTASection";
+import Footer from "@/components/Footer";
+import AuthModal from "@/components/AuthModal";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTab, setModalTab] = useState<"login" | "signup">("signup");
+
+  const openModal = (tab: "login" | "signup") => {
+    setModalTab(tab);
+    setModalOpen(true);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="noise-overlay">
+      <Navbar onOpenModal={openModal} />
+      <HeroSection onOpenModal={openModal} />
+      <TickerBar />
+      <FeaturesSection />
+      <EventsSection onOpenModal={openModal} />
+      <HowItWorksSection />
+      <TestimonialsSection />
+      <PartnersSection />
+      <CTASection onOpenModal={openModal} />
+      <Footer />
+      <AuthModal
+        open={modalOpen}
+        tab={modalTab}
+        onClose={() => setModalOpen(false)}
+        onTabChange={setModalTab}
+      />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
