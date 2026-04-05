@@ -21,7 +21,7 @@ const Index = () => {
   };
 
   return (
-    <div className="noise-overlay">
+    <div className="min-h-screen flex flex-col">
       <Navbar onOpenModal={openModal} />
       <HeroSection onOpenModal={openModal} />
       <TickerBar />

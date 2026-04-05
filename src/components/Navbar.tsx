@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 
 interface NavbarProps {
   onOpenModal: (tab: "login" | "signup") => void;
@@ -15,87 +15,93 @@ const Navbar = ({ onOpenModal }: NavbarProps) => {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const navLinks = [
+    { href: "#events", label: "Événements" },
+    { href: "#about", label: "Services" },
+    { href: "#how", label: "Comment ça marche" },
+    { href: "#contact", label: "Contact" },
+  ];
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-16 h-[72px] border-b border-border/10 backdrop-blur-xl transition-colors duration-300 ${
-        scrolled ? "bg-background/97" : "bg-background/80"
+    <header
+      className={`sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm transition-shadow duration-300 ${
+        scrolled ? "shadow-[0_1px_8px_rgba(0,0,0,0.4)]" : ""
       }`}
     >
-      <a href="#" className="font-display font-extrabold text-[1.6rem] text-foreground tracking-tight">
-        Kivu<span className="text-primary">Pass</span>
-      </a>
+      <div className="container flex h-16 items-center justify-between gap-4">
+        <a href="#" className="flex items-center gap-2.5 font-display font-bold text-xl tracking-tight text-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+            <span className="text-sm font-bold text-primary-foreground">KP</span>
+          </div>
+          Kivu<span className="text-primary">Pass</span>
+        </a>
 
-      <ul className="hidden md:flex items-center gap-9">
-        {[
-          { href: "#events", label: "Explorer" },
-          { href: "#how", label: "Comment ça marche" },
-          { href: "#about", label: "À propos" },
-          { href: "#contact", label: "Contact" },
-        ].map((link) => (
-          <li key={link.href}>
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
+          {navLinks.map((link) => (
             <a
+              key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
+              className="text-muted-foreground hover:text-primary transition-colors"
             >
               {link.label}
-              <span className="absolute -bottom-1 left-0 right-0 h-[1.5px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
             </a>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </nav>
 
-      <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2.5">
+          <button
+            onClick={() => onOpenModal("login")}
+            className="px-5 py-2 rounded-lg text-sm font-semibold text-muted-foreground border border-border hover:border-primary hover:text-foreground transition-all active:scale-95"
+          >
+            Connexion
+          </button>
+          <button
+            onClick={() => onOpenModal("signup")}
+            className="px-5 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95"
+          >
+            Créer un compte
+          </button>
+        </div>
+
         <button
-          onClick={() => onOpenModal("login")}
-          className="px-5 py-2.5 rounded-full text-sm font-semibold text-muted-foreground border border-dark-5 hover:border-foreground/20 hover:text-foreground transition-all"
+          className="md:hidden p-2 active:scale-95 transition-transform"
+          onClick={() => setMobileOpen(!mobileOpen)}
         >
-          Connexion
-        </button>
-        <button
-          onClick={() => onOpenModal("signup")}
-          className="px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_hsl(var(--primary)/0.35)] transition-all relative overflow-hidden"
-        >
-          <span className="absolute inset-0 bg-gradient-to-br from-white/12 to-transparent" />
-          <span className="relative">Créer un compte</span>
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      <button
-        className="md:hidden text-foreground"
-        onClick={() => setMobileOpen(!mobileOpen)}
-      >
-        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
+      {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-[72px] left-0 right-0 bg-background/98 backdrop-blur-xl border-b border-border/10 md:hidden p-6 flex flex-col gap-4">
-          {["Explorer", "Comment ça marche", "À propos", "Contact"].map((label) => (
+        <div className="md:hidden border-t border-border bg-card p-4 space-y-3">
+          {navLinks.map((link) => (
             <a
-              key={label}
-              href="#"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              key={link.href}
+              href={link.href}
+              className="block py-2 text-muted-foreground font-medium hover:text-foreground"
               onClick={() => setMobileOpen(false)}
             >
-              {label}
+              {link.label}
             </a>
           ))}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2.5 pt-3 border-t border-border">
             <button
               onClick={() => { onOpenModal("login"); setMobileOpen(false); }}
-              className="px-5 py-2.5 rounded-full text-sm font-semibold text-muted-foreground border border-dark-5"
+              className="px-5 py-2 rounded-lg text-sm font-semibold text-muted-foreground border border-border"
             >
               Connexion
             </button>
             <button
               onClick={() => { onOpenModal("signup"); setMobileOpen(false); }}
-              className="px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-primary-foreground"
+              className="px-5 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground"
             >
               Créer un compte
             </button>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 
