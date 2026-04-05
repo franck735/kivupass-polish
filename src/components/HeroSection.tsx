@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
+import { Search, ArrowRight, Shield, Zap, Users } from "lucide-react";
 import heroEvent from "@/assets/hero-event.jpg";
-import heroCard from "@/assets/hero-card.jpg";
 
 interface HeroProps {
   onOpenModal: (tab: "signup") => void;
@@ -8,137 +8,88 @@ interface HeroProps {
 
 const HeroSection = ({ onOpenModal }: HeroProps) => {
   return (
-    <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-16 pt-[120px] pb-20 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url(${heroEvent})`,
-            filter: "brightness(0.12) saturate(0.6)",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/98 via-background/85 to-primary/5" />
-        <div className="absolute -bottom-[200px] -right-[200px] w-[700px] h-[700px] bg-[radial-gradient(circle,hsl(var(--primary)/0.1)_0%,transparent_65%)]" />
-        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-gradient-to-b from-transparent via-foreground/4 to-transparent" />
-      </div>
+    <section className="bg-primary py-16 md:py-24 relative overflow-hidden">
+      {/* Subtle background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-[0.06]"
+        style={{ backgroundImage: `url(${heroEvent})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary-deep" />
 
-      <div className="relative z-10 max-w-[760px]">
+      <div className="container relative z-10 text-center space-y-7">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/12 border border-primary/25 rounded-full text-xs font-semibold text-primary uppercase tracking-wider mb-8"
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-foreground/10 border border-primary-foreground/20 rounded-full text-xs font-semibold text-primary-foreground uppercase tracking-wider"
         >
-          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse-dot" />
-          Numéro #1 Afrique Centrale
+          <span className="w-1.5 h-1.5 bg-primary-foreground rounded-full animate-pulse-dot" />
+          Plateforme #1 en Afrique Centrale
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="font-display font-extrabold text-[clamp(3.5rem,7vw,6.5rem)] leading-[0.95] tracking-tight text-foreground mb-8"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="font-display font-bold text-3xl md:text-5xl lg:text-6xl text-primary-foreground leading-tight max-w-3xl mx-auto"
         >
-          La billetterie<br />
-          qui <span className="text-primary italic">change</span> la<br />
-          <span className="text-transparent" style={{ WebkitTextStroke: "2px hsl(var(--foreground) / 0.3)" }}>
-            donne.
-          </span>
+          Votre billetterie événementielle, simplifiée.
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="text-lg text-muted-foreground leading-relaxed max-w-[520px] mb-10"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-primary-foreground/80 text-lg max-w-xl mx-auto leading-relaxed"
         >
-          Plonge dans l'extraordinaire avec KivuPass — la plateforme qui transforme
-          chaque événement en une aventure mémorable. Simple, rapide, sécurisé.
+          Créez, gérez et vendez vos billets en ligne. Paiement mobile money,
+          QR Codes sécurisés, et tableau de bord en temps réel.
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          className="flex items-center gap-4 flex-wrap mb-16"
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4"
         >
-          <a
-            href="#events"
-            className="inline-flex items-center justify-center px-9 py-4 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_hsl(var(--primary)/0.35)] transition-all relative overflow-hidden"
-          >
-            <span className="absolute inset-0 bg-gradient-to-br from-white/12 to-transparent" />
-            <span className="relative">Explorer les événements</span>
-          </a>
           <button
             onClick={() => onOpenModal("signup")}
-            className="inline-flex items-center justify-center px-9 py-4 rounded-full text-base font-semibold border-[1.5px] border-foreground/25 text-foreground hover:border-foreground hover:bg-foreground/5 transition-all"
+            className="px-8 py-3.5 rounded-lg text-base font-bold bg-primary-foreground text-primary hover:bg-foreground transition-all active:scale-95 flex items-center gap-2"
           >
-            Créer votre billetterie
+            Commencer gratuitement
+            <ArrowRight className="w-4 h-4" />
           </button>
+          <a
+            href="#events"
+            className="px-8 py-3.5 rounded-lg text-base font-semibold border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 transition-all active:scale-95 flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+            Explorer les événements
+          </a>
         </motion.div>
 
+        {/* Stats bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.45 }}
-          className="flex items-center gap-10"
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex items-center justify-center gap-6 md:gap-12 pt-8 flex-wrap"
         >
           {[
-            { number: "500", label: "Événements" },
-            { number: "50k", label: "Billets vendus" },
-            { number: "100", label: "Organisateurs" },
-          ].map((stat, i) => (
-            <div key={stat.label} className="flex items-center gap-10">
-              {i > 0 && <div className="w-px h-10 bg-dark-5" />}
-              <div className="flex flex-col">
-                <span className="font-display font-extrabold text-4xl text-foreground leading-none">
-                  {stat.number}<span className="text-primary">+</span>
-                </span>
-                <span className="text-xs text-text-dim font-medium uppercase tracking-wider mt-1">
-                  {stat.label}
-                </span>
+            { icon: Shield, number: "500+", label: "Événements" },
+            { icon: Users, number: "50k+", label: "Billets vendus" },
+            { icon: Zap, number: "100+", label: "Organisateurs" },
+          ].map((stat) => (
+            <div key={stat.label} className="flex items-center gap-3 text-primary-foreground/80">
+              <stat.icon className="w-5 h-5 text-primary-foreground/50" />
+              <div>
+                <span className="font-display font-bold text-xl text-primary-foreground">{stat.number}</span>
+                <span className="text-xs ml-1.5 text-primary-foreground/60">{stat.label}</span>
               </div>
             </div>
           ))}
         </motion.div>
       </div>
-
-      {/* Hero visual - desktop only */}
-      <motion.div
-        initial={{ opacity: 0, x: 60 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        className="absolute right-16 top-1/2 -translate-y-1/2 z-10 w-[420px] hidden lg:block"
-      >
-        <div className="w-full rounded-2xl overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
-          <img
-            src={heroCard}
-            alt="Événement KivuPass"
-            className="w-full h-[520px] object-cover saturate-[0.9]"
-            width={700}
-            height={900}
-          />
-          <div className="absolute inset-0 rounded-2xl border border-foreground/8 pointer-events-none" />
-        </div>
-
-        {/* Floating card 1 */}
-        <div className="absolute -bottom-6 -left-12 flex items-center gap-3 bg-dark-2/92 backdrop-blur-xl border border-foreground/8 rounded-lg px-4 py-3.5">
-          <div className="w-10 h-10 bg-primary rounded-[10px] flex items-center justify-center text-lg shrink-0">
-            🎟️
-          </div>
-          <div>
-            <strong className="block text-sm font-semibold text-foreground">Billet sécurisé</strong>
-            <span className="text-xs text-muted-foreground">QR Code unique</span>
-          </div>
-        </div>
-
-        {/* Floating card 2 */}
-        <div className="absolute top-10 -right-8 text-center bg-dark-2/92 backdrop-blur-xl border border-foreground/8 rounded-lg px-4 py-3.5">
-          <div className="font-display font-extrabold text-3xl text-primary leading-none">4.9★</div>
-          <div className="text-[0.72rem] text-muted-foreground mt-1">Note moyenne</div>
-        </div>
-      </motion.div>
     </section>
   );
 };
