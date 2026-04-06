@@ -1,36 +1,38 @@
 import { motion } from "framer-motion";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 
 interface CTAProps {
   onOpenModal: (tab: "signup") => void;
 }
 
 const CTASection = ({ onOpenModal }: CTAProps) => (
-  <section className="container pb-12">
+  <section className="container py-16">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="p-6 bg-card border border-border rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:border-primary transition-colors"
-      style={{ boxShadow: "2px 2px 0px 0px hsl(var(--primary) / 0.05)" }}
+      className="relative overflow-hidden rounded-2xl bg-primary p-10 md:p-14 text-center"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <MapPin className="h-6 w-6" />
-      </div>
-      <div className="flex-1">
-        <h3 className="font-display font-semibold text-card-foreground">Prêt à créer votre événement ?</h3>
-        <p className="text-sm text-muted-foreground mt-1">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary-deep" />
+      <div className="relative z-10">
+        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-xl bg-primary-foreground/10 mb-5">
+          <Zap className="h-7 w-7 text-primary-foreground" />
+        </div>
+        <h2 className="font-display font-bold text-3xl text-primary-foreground mb-3">
+          Prêt à lancer votre événement ?
+        </h2>
+        <p className="text-primary-foreground/80 max-w-md mx-auto mb-6">
           Rejoignez des centaines d'organisateurs en RDC. Gratuit, sans carte bancaire, prêt en 5 minutes.
         </p>
+        <button
+          onClick={() => onOpenModal("signup")}
+          className="px-8 py-3.5 rounded-lg text-base font-bold bg-primary-foreground text-primary hover:bg-foreground transition-all active:scale-95 inline-flex items-center gap-2"
+        >
+          Commencer gratuitement
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
-      <button
-        onClick={() => onOpenModal("signup")}
-        className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 shrink-0 flex items-center gap-2"
-      >
-        Commencer
-        <ArrowRight className="w-4 h-4" />
-      </button>
     </motion.div>
   </section>
 );
