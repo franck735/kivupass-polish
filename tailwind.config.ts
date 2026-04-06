@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         display: ["Syne", "sans-serif"],
         body: ["Inter", "sans-serif"],
+        bebas: ["Bebas Neue", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -27,6 +28,11 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           deep: "hsl(var(--primary-deep))",
+          light: "hsl(var(--primary-light))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

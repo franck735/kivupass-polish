@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 interface NavbarProps {
   onOpenModal: (tab: "login" | "signup") => void;
@@ -16,9 +16,10 @@ const Navbar = ({ onOpenModal }: NavbarProps) => {
   }, []);
 
   const navLinks = [
-    { href: "#events", label: "Événements" },
-    { href: "#about", label: "Services" },
+    { href: "#events", label: "Explorer" },
     { href: "#how", label: "Comment ça marche" },
+    { href: "#about", label: "À propos" },
+    { href: "#pricing", label: "Tarifs" },
     { href: "#contact", label: "Contact" },
   ];
 
@@ -36,7 +37,6 @@ const Navbar = ({ onOpenModal }: NavbarProps) => {
           Kivu<span className="text-primary">Pass</span>
         </a>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
           {navLinks.map((link) => (
             <a
@@ -72,7 +72,6 @@ const Navbar = ({ onOpenModal }: NavbarProps) => {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border bg-card p-4 space-y-3">
           {navLinks.map((link) => (
