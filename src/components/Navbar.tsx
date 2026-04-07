@@ -9,6 +9,7 @@ interface NavbarProps {
 
 const Navbar = ({ onOpenModal }: NavbarProps) => {
   const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
