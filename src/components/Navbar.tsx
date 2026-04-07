@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
   onOpenModal: (tab: "login" | "signup") => void;
@@ -8,6 +9,7 @@ interface NavbarProps {
 
 const Navbar = ({ onOpenModal }: NavbarProps) => {
   const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -56,6 +58,12 @@ const Navbar = ({ onOpenModal }: NavbarProps) => {
                 <User className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-foreground max-w-[120px] truncate">{displayName}</span>
               </div>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+              </button>
               <button
                 onClick={() => signOut()}
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-muted-foreground border border-border hover:border-destructive hover:text-destructive transition-all active:scale-95 flex items-center gap-1.5"
