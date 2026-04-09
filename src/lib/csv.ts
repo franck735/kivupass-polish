@@ -1,0 +1,23 @@
+export const exportCSV = (data: any[], filename: string) => {
+  if (!data.length) return;
+  const headers = Object.keys(data[0]);
+  const csv = [
+    headers.join(","),
+    ...data.map((row) =>
+      headers.map((h) => {
+        const val = row[h] ?? "";
+        return typeof val === "string" && (val.includes(",") || val.includes('"'))
+          ? `"${val.replace(/"/g, '""')}"`
+          : val;
+      }).join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};

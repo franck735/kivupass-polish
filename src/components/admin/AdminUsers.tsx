@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { exportCSV } from "@/lib/csv";
 
 export const AdminUsers = () => {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -27,7 +30,10 @@ export const AdminUsers = () => {
 
   return (
     <div>
-      <h1 className="font-syne font-bold text-2xl text-foreground mb-6">Utilisateurs ({profiles.length})</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-syne font-bold text-2xl text-foreground">Utilisateurs ({profiles.length})</h1>
+        <Button size="sm" variant="outline" onClick={() => exportCSV(profiles, "utilisateurs")} className="gap-1"><Download size={14} />CSV</Button>
+      </div>
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
