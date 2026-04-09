@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Ticket, Calendar, MapPin, Download } from "lucide-react";
+import { Ticket, Calendar, MapPin, QrCode } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { TicketQR } from "./TicketQR";
 
 export const MyTickets = () => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewTicket, setViewTicket] = useState<any>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -56,11 +59,16 @@ export const MyTickets = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Badge className={statusColor(t.payment_status)}>{t.payment_status}</Badge>
+                <Button size="sm" variant="outline" onClick={() => setViewTicket(t)} className="gap-1">
+                  <QrCode size={14} />Voir
+                </Button>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <TicketQR ticket={viewTicket} open={!!viewTicket} onClose={() => setViewTicket(null)} />
     </div>
   );
 };
