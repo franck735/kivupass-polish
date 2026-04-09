@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Eye } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Download } from "lucide-react";
+import { exportCSV } from "@/lib/csv";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const AdminTickets = () => {
@@ -36,7 +37,10 @@ export const AdminTickets = () => {
 
   return (
     <div>
-      <h1 className="font-syne font-bold text-2xl text-foreground mb-6">Billets ({tickets.length})</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-syne font-bold text-2xl text-foreground">Billets ({tickets.length})</h1>
+        <Button size="sm" variant="outline" onClick={() => exportCSV(tickets, "billets")} className="gap-1"><Download size={14} />CSV</Button>
+      </div>
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
