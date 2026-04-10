@@ -86,7 +86,7 @@ const EventsSection = ({ onOpenModal }: EventsSectionProps) => {
       : events.filter((e) => e.category.toLowerCase() === active.toLowerCase());
 
   return (
-    <section className="container py-16 md:py-20" id="events">
+    <section className="container py-10 md:py-14" id="events">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <motion.h2

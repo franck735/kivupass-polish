@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ShieldCheck, QrCode, CheckCircle2 } from "lucide-react";
 
 const QRSecuritySection = () => (
-  <section className="container py-16 md:py-20">
+  <section className="container py-10 md:py-14">
     <div className="grid md:grid-cols-2 gap-10 items-center">
       <motion.div
         initial={{ opacity: 0, x: -20 }}

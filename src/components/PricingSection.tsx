@@ -38,7 +38,7 @@ const plans = [
 ];
 
 const PricingSection = ({ onOpenModal }: PricingProps) => (
-  <section className="container py-16 md:py-20" id="pricing">
+  <section className="container py-10 md:py-14" id="pricing">
     <div className="mb-10 text-center">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
