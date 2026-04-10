@@ -6,7 +6,7 @@ interface HeroProps {
 }
 
 const HeroSection = ({ onOpenModal }: HeroProps) => (
-  <section className="relative overflow-hidden bg-background py-20 md:py-28">
+  <section className="relative overflow-hidden bg-background py-14 md:py-20">
     {/* Gold gradient accent */}
     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
 

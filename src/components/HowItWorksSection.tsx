@@ -9,7 +9,7 @@ const steps = [
 ];
 
 const HowItWorksSection = () => (
-  <section className="container py-16 md:py-20" id="how">
+  <section className="container py-10 md:py-14" id="how">
     <div className="mb-10 text-center">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}

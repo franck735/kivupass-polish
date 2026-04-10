@@ -20,7 +20,7 @@ const testimonials = [
 ];
 
 const TestimonialsSection = () => (
-  <section className="container py-16 md:py-20">
+  <section className="container py-10 md:py-14">
     <div className="mb-10 text-center">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
