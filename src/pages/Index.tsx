@@ -24,13 +24,7 @@ const Index = () => {
 
   useEffect(() => {
     if (loading || !user) return;
-    supabase.rpc("has_role", { _user_id: user.id, _role: "owner" }).then(({ data }) => {
-      if (data) {
-        navigate("/admin", { replace: true });
-      } else {
-        navigate("/dashboard", { replace: true });
-      }
-    });
+    navigate("/dashboard", { replace: true });
   }, [user, loading, navigate]);
 
   const openModal = (tab: "login" | "signup") => {
