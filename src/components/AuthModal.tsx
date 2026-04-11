@@ -18,12 +18,11 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
   const navigate = useNavigate();
 
   const redirectAfterAuth = async (userId: string) => {
-    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
-    if (data) {
-      navigate("/admin");
-    } else {
-      navigate("/dashboard");
-    }
+    const { data: isOwner } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
+    if (isOwner) { navigate("/dashboard/admin"); return; }
+    const { data: isOrganizer } = await supabase.rpc("has_role", { _user_id: userId, _role: "organizer" });
+    if (isOrganizer) { navigate("/dashboard/organizer"); return; }
+    navigate("/dashboard/participant");
   };
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
