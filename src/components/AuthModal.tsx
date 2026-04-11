@@ -3,6 +3,8 @@ import { X, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuthModalProps {
   open: boolean;
@@ -13,6 +15,16 @@ interface AuthModalProps {
 
 const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
   const { signUp, signIn, resetPassword } = useAuth();
+  const navigate = useNavigate();
+
+  const redirectAfterAuth = async (userId: string) => {
+    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
+    if (data) {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
 
@@ -52,8 +64,13 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Vérifiez votre email pour confirmer votre compte.");
+      toast.success("Compte créé avec succès !");
       handleClose();
+      // Auto-confirm is enabled, so user is logged in immediately
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await redirectAfterAuth(session.user.id);
+      }
     }
   };
 
@@ -68,6 +85,10 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
     } else {
       toast.success("Connecté avec succès !");
       handleClose();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await redirectAfterAuth(session.user.id);
+      }
     }
   };
 
