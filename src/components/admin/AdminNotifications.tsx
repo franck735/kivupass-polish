@@ -21,7 +21,7 @@ export const AdminNotifications = () => {
       const { data } = await supabase.from("profiles").select("id");
       userIds = (data || []).map((p) => p.id);
     } else {
-      const role = targetRole === "participant" ? "attendee" : targetRole;
+      const role = targetRole === "participant" ? "attendee" : targetRole as "organizer" | "owner";
       const { data } = await supabase.from("user_roles").select("user_id").eq("role", role);
       userIds = (data || []).map((r) => r.user_id);
     }
