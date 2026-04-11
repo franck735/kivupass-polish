@@ -9,6 +9,9 @@ import { AdminEvents } from "@/components/admin/AdminEvents";
 import { AdminRequests } from "@/components/admin/AdminRequests";
 import { AdminMessages } from "@/components/admin/AdminMessages";
 import { AdminSettings } from "@/components/admin/AdminSettings";
+import { AdminFinance } from "@/components/admin/AdminFinance";
+import { AdminValidationLog } from "@/components/admin/AdminValidationLog";
+import { AdminNotifications } from "@/components/admin/AdminNotifications";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Menu } from "lucide-react";
 
@@ -37,8 +40,11 @@ const Admin = () => {
       case "users": return <AdminUsers />;
       case "tickets": return <AdminTickets />;
       case "events": return <AdminEvents />;
+      case "finance": return <AdminFinance />;
+      case "validation": return <AdminValidationLog />;
       case "requests": return <AdminRequests />;
       case "messages": return <AdminMessages />;
+      case "notifications": return <AdminNotifications />;
       case "settings": return <AdminSettings />;
       default: return <AdminDashboard />;
     }
