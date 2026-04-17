@@ -18,7 +18,7 @@ export const RoleGuard = ({ allowedRoles, children }: RoleGuardProps) => {
   const { role, loading: roleLoading } = useUserRole();
 
   if (authLoading || roleLoading) return <Spinner />;
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/login" replace />;
   if (!role || !allowedRoles.includes(role)) return <Navigate to="/dashboard" replace />;
 
   return <>{children}</>;

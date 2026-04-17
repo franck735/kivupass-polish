@@ -7,32 +7,32 @@ interface PricingProps {
 
 const plans = [
   {
-    name: "Gratuit",
+    name: "Accès Agora",
     price: "0$",
-    desc: "Pour commencer sans risque",
+    desc: "Pour acheter, explorer et démarrer",
     features: [
-      "Créer un compte",
       "Explorer les événements",
       "Acheter des billets",
+      "Suivre vos commandes",
       "QR Code sécurisé",
-      "Support par messagerie",
+      "Messagerie et notifications",
     ],
-    cta: "Commencer",
+    cta: "Entrer dans Agora",
     highlighted: false,
   },
   {
-    name: "Organisateur",
+    name: "Publication",
     price: "20$",
-    desc: "Par événement publié",
+    desc: "Par événement publié dans Agora",
     features: [
-      "Publier un événement",
+      "Créer et soumettre un événement",
       "Billetterie complète",
       "Tableau de bord des ventes",
       "Recevoir 85% des ventes",
-      "Paiement Mobile Money",
+      "Paiements préremplis depuis votre profil",
       "Support prioritaire",
     ],
-    cta: "Devenir organisateur",
+    cta: "Publier mon événement",
     highlighted: true,
   },
 ];
@@ -56,7 +56,7 @@ const PricingSection = ({ onOpenModal }: PricingProps) => (
         transition={{ duration: 0.5, delay: 0.05 }}
         className="text-muted-foreground mt-2 max-w-md mx-auto"
       >
-        Gratuit pour les acheteurs. 20$ par événement pour les organisateurs.
+        L'accès à Agora est gratuit. Vous payez 20$ seulement quand vous publiez un événement.
         Commission plateforme de 15%.
       </motion.p>
     </div>

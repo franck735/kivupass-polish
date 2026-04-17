@@ -42,7 +42,7 @@ export const AdminValidationLog = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-border text-muted-foreground text-left">
-                  <th className="p-3">Événement</th><th className="p-3">Participant</th><th className="p-3">Organisateur</th><th className="p-3">Validé le</th>
+                  <th className="p-3">Événement</th><th className="p-3">Acheteur</th><th className="p-3">Créateur</th><th className="p-3">Validé le</th>
                 </tr></thead>
                 <tbody>
                   {filtered.map((t) => (

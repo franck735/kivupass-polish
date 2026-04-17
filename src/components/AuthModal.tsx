@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ADMIN_SPACE_NAME, AGORA_SPACE_NAME, resolveDashboardPath } from "@/lib/spaces";
 
 interface AuthModalProps {
   open: boolean;
@@ -18,11 +19,7 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
   const navigate = useNavigate();
 
   const redirectAfterAuth = async (userId: string) => {
-    const { data: isOwner } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
-    if (isOwner) { navigate("/dashboard/admin"); return; }
-    const { data: isOrganizer } = await supabase.rpc("has_role", { _user_id: userId, _role: "organizer" });
-    if (isOrganizer) { navigate("/dashboard/organizer"); return; }
-    navigate("/dashboard/participant");
+    navigate(await resolveDashboardPath(userId));
   };
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
@@ -88,6 +85,29 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
       if (session?.user) {
         await redirectAfterAuth(session.user.id);
       }
+    }
+  };
+  const quickLogins = [
+    { role: AGORA_SPACE_NAME, email: "user@kivupass.local", password: "user123" },
+    { role: `${AGORA_SPACE_NAME} Pro`, email: "org@kivupass.local", password: "org123" },
+    { role: ADMIN_SPACE_NAME, email: "admin@kivupass.local", password: "admin123" },
+  ];
+
+  const handleQuickLogin = async (emailValue: string, passwordValue: string) => {
+    setEmail(emailValue);
+    setPassword(passwordValue);
+    setLoading(true);
+    const { error } = await signIn(emailValue, passwordValue);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Connecté avec succès !");
+    handleClose();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await redirectAfterAuth(session.user.id);
     }
   };
 
@@ -222,6 +242,21 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
                 <div className="mb-4">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Email</label>
                   <input type="email" placeholder="nom@exemple.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
+                </div>
+                <div className="mb-4 space-y-2">
+                  <p className="text-sm text-muted-foreground">Connexion rapide :</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {quickLogins.map((item) => (
+                      <button
+                        key={item.role}
+                        type="button"
+                        onClick={() => handleQuickLogin(item.email, item.password)}
+                        className="rounded-xl border border-dark-5 px-3 py-2 text-xs font-semibold text-foreground hover:bg-dark-4 transition-all"
+                      >
+                        {item.role}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="mb-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Mot de passe</label>

@@ -33,7 +33,7 @@ export const OrganizerAttendees = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-syne font-bold text-2xl text-foreground">Participants ({filtered.length})</h1>
+        <h1 className="font-syne font-bold text-2xl text-foreground">Public & billets ({filtered.length})</h1>
         <Button size="sm" variant="outline" onClick={() => exportCSV(filtered, "participants")} className="gap-1">
           <Download size={14} /> CSV
         </Button>
@@ -49,10 +49,10 @@ export const OrganizerAttendees = () => {
       </div>
 
       {filtered.length === 0 ? (
-        <Card>
+          <Card>
           <CardContent className="p-8 text-center">
             <Users size={48} className="mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">Aucun participant pour le moment.</p>
+            <p className="text-muted-foreground">Aucun acheteur pour le moment.</p>
           </CardContent>
         </Card>
       ) : (

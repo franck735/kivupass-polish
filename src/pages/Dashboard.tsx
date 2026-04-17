@@ -14,12 +14,11 @@ const Dashboard = () => {
     );
   }
 
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   switch (role) {
     case "owner": return <Navigate to="/dashboard/admin" replace />;
-    case "organizer": return <Navigate to="/dashboard/organizer" replace />;
-    default: return <Navigate to="/dashboard/participant" replace />;
+    default: return <Navigate to="/dashboard/agora" replace />;
   }
 };
 

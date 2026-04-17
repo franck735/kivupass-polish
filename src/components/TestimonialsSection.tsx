@@ -5,17 +5,17 @@ const testimonials = [
   {
     text: "KivuPass a transformé la gestion de mes événements. Plus de billets papier, tout est numérique et sécurisé !",
     name: "Patrick M.",
-    role: "Organisateur, Goma",
+    role: "Créateur Agora, Goma",
   },
   {
     text: "J'ai acheté mon billet en 2 minutes avec Airtel Money. Le QR code a fonctionné parfaitement à l'entrée.",
     name: "Grace N.",
-    role: "Participante, Kinshasa",
+    role: "Membre Agora, Kinshasa",
   },
   {
     text: "Le tableau de bord est incroyable. Je vois mes ventes en temps réel et je peux exporter les données facilement.",
     name: "Jean-Claude K.",
-    role: "Organisateur, Bukavu",
+    role: "Créateur Agora, Bukavu",
   },
 ];
 

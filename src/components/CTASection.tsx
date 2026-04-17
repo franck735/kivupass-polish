@@ -23,7 +23,7 @@ const CTASection = ({ onOpenModal }: CTAProps) => (
           Prêt à lancer votre événement ?
         </h2>
         <p className="text-primary-foreground/80 max-w-md mx-auto mb-6">
-          Rejoignez des centaines d'organisateurs en RDC. Gratuit, sans carte bancaire, prêt en 5 minutes.
+          Rejoignez des centaines de membres Agora en RDC. Gratuit, sans carte bancaire, prêt en 5 minutes.
         </p>
         <button
           onClick={() => onOpenModal("signup")}

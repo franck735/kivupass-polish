@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -20,10 +21,12 @@ export const PurchaseModal = ({ event, open, onClose }: PurchaseModalProps) => {
   const [step, setStep] = useState(1);
   const [payPhone, setPayPhone] = useState("");
   const [payOperator, setPayOperator] = useState("Airtel Money");
+  const [transactionId, setTransactionId] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const reset = () => { setStep(1); setPayPhone(""); setProofFile(null); };
+  const reset = () => { setStep(1); setPayPhone(""); setTransactionId(""); setProofFile(null); };
 
   const handleSubmit = async () => {
     if (!user || !event) return;
@@ -61,10 +64,11 @@ export const PurchaseModal = ({ event, open, onClose }: PurchaseModalProps) => {
       org_pay_phone: event.payment_phone,
       org_pay_operator: event.payment_operator,
       owner_id: user.id,
-      owner_name: user.user_metadata?.full_name || "",
+      owner_name: user.full_name || "",
       owner_email: user.email || "",
       payment_method: payOperator,
       payment_phone: payPhone,
+      transaction_id: transactionId || null,
       proof_image_url: proofUrl,
       payment_status: "pending",
     });
@@ -137,6 +141,10 @@ export const PurchaseModal = ({ event, open, onClose }: PurchaseModalProps) => {
               <label className="text-sm text-muted-foreground mb-1 block">Numéro de téléphone</label>
               <Input placeholder="+243..." value={payPhone} onChange={(e) => setPayPhone(e.target.value)} />
             </div>
+            <div>
+              <label className="text-sm text-muted-foreground mb-1 block">ID de transaction</label>
+              <Input placeholder="Ex: TRX123456789" value={transactionId} onChange={(e) => setTransactionId(e.target.value)} />
+            </div>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(1)} className="gap-1"><ArrowLeft size={14} />Retour</Button>
               <Button onClick={() => setStep(3)} disabled={!payPhone} className="flex-1">Suivant</Button>
@@ -155,7 +163,23 @@ export const PurchaseModal = ({ event, open, onClose }: PurchaseModalProps) => {
               <span className="text-sm text-muted-foreground">
                 {proofFile ? proofFile.name : "Cliquez pour choisir un fichier"}
               </span>
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => setProofFile(e.target.files?.[0] || null)} />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }}
+                className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+              >
+                Choisir une image
+              </button>
             </label>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(2)} className="gap-1"><ArrowLeft size={14} />Retour</Button>

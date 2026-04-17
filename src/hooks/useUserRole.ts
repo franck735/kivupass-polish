@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-export type UserRole = "owner" | "organizer" | "attendee" | null;
+export type UserRole = "owner" | "agora" | null;
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -16,10 +16,7 @@ export const useUserRole = () => {
       const { data: isOwner } = await supabase.rpc("has_role", { _user_id: user.id, _role: "owner" });
       if (isOwner) { setRole("owner"); setLoading(false); return; }
 
-      const { data: isOrganizer } = await supabase.rpc("has_role", { _user_id: user.id, _role: "organizer" });
-      if (isOrganizer) { setRole("organizer"); setLoading(false); return; }
-
-      setRole("attendee");
+      setRole("agora");
       setLoading(false);
     };
     check();

@@ -55,7 +55,7 @@ export const AdminFinance = () => {
             <DollarSign size={28} className="text-muted-foreground" />
             <div>
               <p className="text-2xl font-bold text-foreground">${(grossRevenue - commissions).toFixed(0)}</p>
-              <p className="text-xs text-muted-foreground">Reversé aux organisateurs</p>
+              <p className="text-xs text-muted-foreground">Reversé aux créateurs Agora</p>
             </div>
           </CardContent>
         </Card>

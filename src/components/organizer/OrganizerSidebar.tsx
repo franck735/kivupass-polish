@@ -1,15 +1,17 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, DollarSign, QrCode, Users, MessageSquare, User, Home, LogOut, PlusCircle } from "lucide-react";
+import { CalendarDays, DollarSign, QrCode, Users, MessageSquare, User, Home, LogOut, PlusCircle, FileText, Bell } from "lucide-react";
 
 const menuItems = [
   { id: "events", label: "Mes Événements", icon: CalendarDays },
   { id: "create", label: "Créer un événement", icon: PlusCircle },
+  { id: "requests", label: "Mes demandes", icon: FileText },
   { id: "sales", label: "Ventes & Revenus", icon: DollarSign },
   { id: "validate", label: "Valider les billets", icon: QrCode },
   { id: "attendees", label: "Participants", icon: Users },
   { id: "messages", label: "Messages", icon: MessageSquare },
   { id: "profile", label: "Mon Profil", icon: User },
+  { id: "notifications", label: "Notifications", icon: Bell },
 ];
 
 interface Props {

@@ -20,7 +20,7 @@ const features = [
   {
     icon: BarChart3,
     title: "Tableau de bord temps réel",
-    desc: "Suivez vos ventes en temps réel, gérez vos participants et exportez vos données depuis un seul endroit.",
+    desc: "Suivez vos ventes en temps réel, gérez votre public et exportez vos données depuis un seul espace.",
   },
 ];
 
@@ -43,7 +43,7 @@ const FeaturesSection = () => (
         transition={{ duration: 0.5, delay: 0.05 }}
         className="text-muted-foreground mt-2 max-w-lg mx-auto"
       >
-        Tout ce qu'il faut pour gérer vos événements de A à Z.
+        Tout ce qu'il faut pour faire vivre vos événements de A à Z dans Agora.
       </motion.p>
     </div>
 

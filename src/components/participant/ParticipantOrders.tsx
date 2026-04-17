@@ -43,6 +43,7 @@ export const ParticipantOrders = () => {
                 <thead>
                   <tr className="border-b border-border text-muted-foreground text-left">
                     <th className="p-3">Événement</th>
+                    <th className="p-3">ID Transaction</th>
                     <th className="p-3">Montant</th>
                     <th className="p-3">Méthode</th>
                     <th className="p-3">Date</th>
@@ -53,6 +54,7 @@ export const ParticipantOrders = () => {
                   {tickets.map((t) => (
                     <tr key={t.id} className="border-b border-border hover:bg-muted/30">
                       <td className="p-3 font-medium text-foreground">{t.event_title}</td>
+                      <td className="p-3 text-muted-foreground">{t.transaction_id || "—"}</td>
                       <td className="p-3">{t.price} {t.currency}</td>
                       <td className="p-3 text-muted-foreground">{t.payment_method || "Mobile Money"}</td>
                       <td className="p-3 text-muted-foreground">{new Date(t.purchased_at).toLocaleDateString("fr-FR")}</td>

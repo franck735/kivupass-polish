@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Users, Ticket, CalendarDays, FileText, MessageSquare, Settings, LogOut, Home, DollarSign, QrCode, Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ADMIN_SPACE_NAME } from "@/lib/spaces";
 
 const menuItems = [
   { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -31,8 +32,8 @@ export const AdminSidebar = ({ activeTab, onTabChange, open }: Props) => {
     )}>
       <div className="px-6 py-5 border-b border-sidebar-border">
         <span className="font-syne font-extrabold text-xl text-primary tracking-tight">KivuPass</span>
-        <p className="text-xs text-muted-foreground mt-0.5">Panel Admin</p>
-        <span className="inline-block mt-1 text-[10px] uppercase tracking-wider bg-destructive/10 text-destructive px-2 py-0.5 rounded-full font-semibold">Owner</span>
+        <p className="text-xs text-muted-foreground mt-0.5">Espace administration</p>
+        <span className="inline-block mt-1 text-[10px] uppercase tracking-wider bg-destructive/10 text-destructive px-2 py-0.5 rounded-full font-semibold">{ADMIN_SPACE_NAME}</span>
       </div>
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {menuItems.map((item) => (

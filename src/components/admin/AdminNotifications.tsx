@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Send, Bell } from "lucide-react";
+import { ADMIN_SPACE_NAME, AGORA_SOURCE_ROLES, AGORA_SPACE_NAME } from "@/lib/spaces";
 
 export const AdminNotifications = () => {
   const [message, setMessage] = useState("");
@@ -20,9 +21,17 @@ export const AdminNotifications = () => {
     if (targetRole === "all") {
       const { data } = await supabase.from("profiles").select("id");
       userIds = (data || []).map((p) => p.id);
+    } else if (targetRole === "agora") {
+      const responses = await Promise.all(
+        AGORA_SOURCE_ROLES.map((role) =>
+          supabase.from("user_roles").select("user_id").eq("role", role)
+        )
+      );
+      userIds = Array.from(
+        new Set(responses.flatMap(({ data }) => (data || []).map((row) => row.user_id)))
+      );
     } else {
-      const role = targetRole === "participant" ? "attendee" : targetRole as "organizer" | "owner";
-      const { data } = await supabase.from("user_roles").select("user_id").eq("role", role);
+      const { data } = await supabase.from("user_roles").select("user_id").eq("role", "owner");
       userIds = (data || []).map((r) => r.user_id);
     }
 
@@ -47,7 +56,7 @@ export const AdminNotifications = () => {
 
   return (
     <div className="max-w-lg">
-      <h1 className="font-syne font-bold text-2xl text-foreground mb-6">Notifications & Broadcasts</h1>
+      <h1 className="font-syne font-bold text-2xl text-foreground mb-6">Notifications & diffusions</h1>
 
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Bell size={20} /> Envoyer une notification</CardTitle></CardHeader>
@@ -60,8 +69,8 @@ export const AdminNotifications = () => {
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="all">Tous les utilisateurs</option>
-              <option value="participant">Participants uniquement</option>
-              <option value="organizer">Organisateurs uniquement</option>
+              <option value="agora">{AGORA_SPACE_NAME} uniquement</option>
+              <option value="owner">{ADMIN_SPACE_NAME} uniquement</option>
             </select>
           </div>
           <div>

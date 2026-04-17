@@ -27,8 +27,8 @@ const HeroSection = ({ onOpenModal }: HeroProps) => (
         transition={{ duration: 0.6, delay: 0.1 }}
         className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight max-w-4xl mx-auto"
       >
-        Créez, gérez et vendez vos{" "}
-        <span className="text-primary">billets</span> en ligne.
+        Achetez, créez et gérez vos{" "}
+        <span className="text-primary">événements</span> dans un seul espace.
       </motion.h1>
 
       <motion.p
@@ -37,7 +37,7 @@ const HeroSection = ({ onOpenModal }: HeroProps) => (
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed"
       >
-        Paiement Mobile Money, QR Codes sécurisés anti-fraude, et tableau de bord en temps réel.
+        Agora réunit l'achat de billets, la création d'événements, les QR Codes anti-fraude et le suivi en temps réel.
         Simple, rapide, sécurisé.
       </motion.p>
 
@@ -72,7 +72,7 @@ const HeroSection = ({ onOpenModal }: HeroProps) => (
         {[
           { icon: Shield, number: "500+", label: "Événements" },
           { icon: Users, number: "1k+", label: "Billets vendus" },
-          { icon: Zap, number: "100+", label: "Organisateurs" },
+          { icon: Zap, number: "100+", label: "Membres Agora" },
         ].map((stat) => (
           <div key={stat.label} className="flex items-center gap-3 text-muted-foreground">
             <stat.icon className="w-5 h-5 text-primary/60" />

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { exportCSV } from "@/lib/csv";
+import { mapRolesToSpaces } from "@/lib/spaces";
 
 export const AdminUsers = () => {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -25,6 +26,7 @@ export const AdminUsers = () => {
   }, []);
 
   const getUserRoles = (userId: string) => roles.filter((r) => r.user_id === userId).map((r) => r.role);
+  const getUserSpaces = (userId: string) => mapRolesToSpaces(getUserRoles(userId));
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -39,7 +41,7 @@ export const AdminUsers = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border text-muted-foreground text-left">
-                <th className="p-3">Nom</th><th className="p-3">Email</th><th className="p-3">Téléphone</th><th className="p-3">Rôles</th><th className="p-3">Inscrit le</th>
+                <th className="p-3">Nom</th><th className="p-3">Email</th><th className="p-3">Téléphone</th><th className="p-3">Espaces</th><th className="p-3">Inscrit le</th>
               </tr></thead>
               <tbody>
                 {profiles.map((p) => (
@@ -47,7 +49,7 @@ export const AdminUsers = () => {
                     <td className="p-3 font-medium text-foreground">{p.name || "—"}</td>
                     <td className="p-3 text-muted-foreground">{p.email}</td>
                     <td className="p-3 text-muted-foreground">{p.phone || "—"}</td>
-                    <td className="p-3">{getUserRoles(p.id).map((r) => (
+                    <td className="p-3">{getUserSpaces(p.id).map((r) => (
                       <Badge key={r} variant="outline" className="mr-1 text-xs">{r}</Badge>
                     ))}</td>
                     <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString("fr-FR")}</td>

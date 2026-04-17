@@ -27,7 +27,7 @@ const HowItWorksSection = () => (
         transition={{ duration: 0.5, delay: 0.05 }}
         className="text-muted-foreground mt-2"
       >
-        4 étapes simples pour obtenir votre billet.
+        4 étapes simples pour acheter un billet ou commencer votre première billetterie.
       </motion.p>
     </div>
 
