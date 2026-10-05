@@ -1,90 +1,46 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Search, Shield, Zap, Users } from "lucide-react";
+import { ArrowDownRight, ArrowRight, CalendarDays, MapPin, Search, ShieldCheck, TicketCheck } from "lucide-react";
+import heroEvent from "@/assets/hero-event.jpg";
 
-interface HeroProps {
-  onOpenModal: (tab: "signup") => void;
-}
+interface HeroProps { onOpenModal: (tab: "signup") => void; onExplore: (query: string) => void }
 
-const HeroSection = ({ onOpenModal }: HeroProps) => (
-  <section className="relative overflow-hidden bg-background py-14 md:py-20">
-    {/* Gold gradient accent */}
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
+const HeroSection = ({ onOpenModal, onExplore }: HeroProps) => {
+  const [search, setSearch] = useState("");
+  const submitSearch = (event: React.FormEvent) => { event.preventDefault(); onExplore(search.trim()); };
 
-    <div className="container relative z-10 text-center space-y-7">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-xs font-semibold text-primary uppercase tracking-wider"
-      >
-        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse-dot" />
-        La billetterie numérique du Congo
-      </motion.div>
-
-      <motion.h1
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight max-w-4xl mx-auto"
-      >
-        Achetez, créez et gérez vos{" "}
-        <span className="text-primary">événements</span> dans un seul espace.
-      </motion.h1>
-
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed"
-      >
-        Agora réunit l'achat de billets, la création d'événements, les QR Codes anti-fraude et le suivi en temps réel.
-        Simple, rapide, sécurisé.
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4"
-      >
-        <button
-          onClick={() => onOpenModal("signup")}
-          className="px-8 py-3.5 rounded-lg text-base font-bold bg-primary text-primary-foreground hover:bg-primary-light transition-all active:scale-95 flex items-center gap-2"
-        >
-          Commencer gratuitement
-          <ArrowRight className="w-4 h-4" />
-        </button>
-        <a
-          href="#events"
-          className="px-8 py-3.5 rounded-lg text-base font-semibold border border-border text-foreground hover:border-primary hover:text-primary transition-all active:scale-95 flex items-center gap-2"
-        >
-          <Search className="w-4 h-4" />
-          Explorer les événements
-        </a>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="flex items-center justify-center gap-8 md:gap-14 pt-10 flex-wrap"
-      >
-        {[
-          { icon: Shield, number: "500+", label: "Événements" },
-          { icon: Users, number: "1k+", label: "Billets vendus" },
-          { icon: Zap, number: "100+", label: "Membres Agora" },
-        ].map((stat) => (
-          <div key={stat.label} className="flex items-center gap-3 text-muted-foreground">
-            <stat.icon className="w-5 h-5 text-primary/60" />
-            <div>
-              <span className="font-display font-bold text-2xl text-foreground">{stat.number}</span>
-              <span className="text-xs ml-1.5 text-muted-foreground">{stat.label}</span>
-            </div>
-          </div>
-        ))}
+  return <section className="kp-hero relative isolate min-h-[740px] h-[100svh] max-h-[1080px] overflow-hidden bg-slate-950" aria-label="Bienvenue sur KivuPass">
+    <img src={heroEvent} alt="Concert en plein air au coucher du soleil" fetchPriority="high" className="absolute inset-0 -z-30 h-full w-full object-cover object-center saturate-[.62]" />
+    <div aria-hidden="true" className="absolute inset-0 -z-20 bg-[linear-gradient(180deg,rgba(12,68,67,.54)_0%,rgba(12,54,56,.36)_40%,rgba(8,31,32,.78)_100%)]" />
+    <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_12%,rgba(30,151,149,.36),transparent_55%)] mix-blend-screen" />
+    <div className="kp-hero__copy absolute inset-x-5 top-[19%] mx-auto flex max-w-4xl flex-col items-center text-center sm:top-[20%]">
+      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }}>
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-[11px] font-medium tracking-wide text-white backdrop-blur-md"><MapPin size={13} />Goma · Bukavu · Kinshasa</span>
+        <h1 className="mt-7 font-display text-[clamp(2.7rem,7.1vw,5.7rem)] font-semibold leading-[.98] tracking-[-.06em] text-white drop-shadow-lg">La scène est à vous.<br /><span className="text-[#d5eee8]">Vivez-la en vrai.</span></h1>
+        <p className="mx-auto mt-5 max-w-xl text-sm leading-6 text-white/85 sm:text-base sm:leading-7">Concerts, festivals et rencontres : découvrez les événements qui font vibrer la région des Grands Lacs.</p>
+        <form onSubmit={submitSearch} className="mx-auto mt-7 flex w-full max-w-[310px] items-center rounded-full border border-white/30 bg-white/95 p-1.5 pl-4 shadow-xl shadow-black/15 sm:max-w-[340px]">
+          <Search size={17} className="shrink-0 text-slate-500" /><input aria-label="Rechercher un événement" value={search} onChange={event => setSearch(event.target.value)} placeholder="Une sortie vous tente ?" className="min-w-0 flex-1 bg-transparent px-2.5 text-xs text-slate-800 outline-none placeholder:text-slate-500" />
+          <button type="submit" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#147a79] text-white transition hover:bg-[#0f6362]" aria-label="Rechercher"><ArrowRight size={17} /></button>
+        </form>
       </motion.div>
     </div>
-  </section>
-);
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-t from-slate-950/55 to-transparent" />
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto flex max-w-[1440px] items-end justify-between gap-4 px-5 pb-8 sm:px-8 lg:px-14 lg:pb-10">
+      <article className="kp-glass-card pointer-events-auto hidden w-[300px] rounded-2xl p-5 text-white sm:block md:w-[330px] md:p-6">
+        <span className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 text-[#167b79]"><TicketCheck size={19} /></span>
+        <h2 className="font-display text-lg font-semibold">Un billet. Toute la soirée.</h2>
+        <p className="mt-2 text-xs leading-[1.65] text-white/75">Réservez en quelques instants, gardez votre billet dans votre compte et présentez votre QR code à l’entrée.</p>
+      </article>
+      <a href="#events" className="pointer-events-auto ml-auto flex items-center gap-3 rounded-full border border-white/30 bg-white/10 px-4 py-2.5 text-xs font-medium text-white backdrop-blur-lg transition hover:bg-white/20 sm:hidden">Explorer les sorties<ArrowDownRight size={16} /></a>
+      <article className="kp-glass-card pointer-events-auto hidden w-[300px] rounded-2xl p-5 text-white sm:block md:w-[330px] md:p-6">
+        <div className="flex items-center gap-2 text-xs font-medium text-white/80"><CalendarDays size={14} />La prochaine histoire commence ici</div>
+        <h2 className="mt-3 font-display text-lg font-semibold">La culture, tout près.</h2>
+        <p className="mt-2 text-xs leading-[1.65] text-white/75">Parcourez les rendez-vous de Goma, Bukavu, Kinshasa et des villes voisines.</p>
+        <button type="button" onClick={() => onOpenModal("signup")} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#d7f1e9] hover:text-white">Rejoindre KivuPass <ArrowRight size={14} /></button>
+      </article>
+    </div>
+    <div className="absolute bottom-[27px] left-1/2 hidden -translate-x-1/2 items-center gap-2 text-[10px] tracking-[.12em] text-white/65 lg:flex"><ShieldCheck size={13} /> BILLETTERIE ET CONTRÔLE SÉCURISÉS</div>
+  </section>;
+};
 
 export default HeroSection;

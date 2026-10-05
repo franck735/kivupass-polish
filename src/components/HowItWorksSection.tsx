@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { UserPlus, Search, CreditCard, QrCode } from "lucide-react";
 
 const steps = [
-  { number: "01", icon: UserPlus, title: "Créez un compte", desc: "Inscription gratuite en 30 secondes." },
+  { number: "01", icon: UserPlus, title: "Créez un compte", desc: "Inscrivez-vous avec votre adresse e-mail." },
   { number: "02", icon: Search, title: "Explorez", desc: "Parcourez les événements disponibles." },
-  { number: "03", icon: CreditCard, title: "Payez Mobile Money", desc: "Airtel, Orange, Vodacom, Africel." },
-  { number: "04", icon: QrCode, title: "Recevez votre QR", desc: "Billet numérique anti-fraude." },
+  { number: "03", icon: CreditCard, title: "Effectuez le paiement", desc: "Suivez les coordonnées et consignes affichées pour l'événement." },
+  { number: "04", icon: QrCode, title: "Présentez votre billet", desc: "Après validation du paiement, retrouvez votre QR code dans votre compte." },
 ];
 
 const HowItWorksSection = () => (
@@ -27,7 +27,7 @@ const HowItWorksSection = () => (
         transition={{ duration: 0.5, delay: 0.05 }}
         className="text-muted-foreground mt-2"
       >
-        4 étapes simples pour acheter un billet ou commencer votre première billetterie.
+        Du choix de l'événement à la vérification de votre billet, chaque étape est indiquée.
       </motion.p>
     </div>
 

@@ -1,154 +1,138 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, LockKeyhole, Mail, TicketCheck, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { ADMIN_SPACE_NAME, AGORA_SPACE_NAME, resolveDashboardPath } from "@/lib/spaces";
+import "./AuthPage.css";
 
-interface AuthPageProps {
-  mode: "login" | "signup";
-}
+interface AuthPageProps { mode: "login" | "signup" }
 
 const AuthPage = ({ mode }: AuthPageProps) => {
   const { user, loading, signUp, signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [tab, setTab] = useState<typeof mode>(mode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<"google" | "apple" | null>(null);
 
-  useEffect(() => {
-    setTab(mode);
-  }, [mode]);
-
+  useEffect(() => setTab(mode), [mode]);
   useEffect(() => {
     if (!loading && user) {
-      navigate("/dashboard", { replace: true });
+      const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
+      navigate(from ? `${from.pathname || "/dashboard"}${from.search || ""}${from.hash || ""}` : "/dashboard", { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location.state]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = params.get("access_token");
+    const oauthError = params.get("error_description");
+    if (oauthError) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+      toast.error(decodeURIComponent(oauthError.replaceAll("+", " ")));
+      return;
+    }
+    if (!accessToken) return;
+    setSocialLoading("google");
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    void lovable.auth.completeOAuthSignIn(accessToken)
+      .then(async (oauthUser) => {
+        if (!oauthUser.email) throw new Error("Le fournisseur n’a pas retourné d’adresse e-mail.");
+        const result = await supabase.auth.completeOAuthSignIn({ id: oauthUser.id, email: oauthUser.email, name: oauthUser.user_metadata?.full_name || oauthUser.user_metadata?.name });
+        if (result.error) throw new Error(result.error.message);
+        toast.success("Connexion réussie !");
+        const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
+        navigate(from ? `${from.pathname || "/dashboard"}${from.search || ""}${from.hash || ""}` : await resolveDashboardPath(result.data.session.user.id), { replace: true });
+      })
+      .catch((error: Error) => toast.error(error.message || "Connexion impossible. Réessayez."))
+      .finally(() => setSocialLoading(null));
+  }, []);
 
   const redirectAfterAuth = async () => {
+    const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
+    if (from) {
+      navigate(`${from.pathname || "/dashboard"}${from.search || ""}${from.hash || ""}`, { replace: true });
+      return;
+    }
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user?.id;
-    if (!userId) return;
-    navigate(await resolveDashboardPath(userId), { replace: true });
+    if (userId) navigate(await resolveDashboardPath(userId), { replace: true });
   };
 
-  const handleSignup = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
     if (!email || !password) return;
     setIsLoading(true);
-    const fullName = name.trim();
-    const { error } = await signUp(email, password, { name: fullName });
+    const result = tab === "signup"
+      ? await signUp(email, password, { name: name.trim() })
+      : await signIn(email, password);
     setIsLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Compte créé avec succès !");
-      await redirectAfterAuth();
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
     }
+    toast.success(tab === "signup" ? "Compte créé avec succès !" : "Connecté avec succès !");
+    await redirectAfterAuth();
   };
 
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) return;
-    setIsLoading(true);
-    const { error } = await signIn(email, password);
-    setIsLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Connecté avec succès !");
-      await redirectAfterAuth();
-    }
+  const changeTab = (next: typeof mode) => {
+    setTab(next);
+    navigate(next === "login" ? "/login" : "/signup", { replace: true });
   };
 
-  const pageTitle = tab === "signup" ? "Créer un compte" : "Connexion";
+  const signInSocial = async (provider: "google" | "apple") => {
+    setSocialLoading(provider);
+    const { error } = await lovable.auth.signInWithOAuth(provider);
+    if (error) { setSocialLoading(null); toast.error(error.message); }
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl rounded-3xl border border-border bg-card shadow-xl overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="p-10 border-b border-border lg:border-b-0 lg:border-r lg:p-12 bg-gradient-to-br from-[#0a0a0c] via-[#121214] to-[#161618]">
-            <div className="mb-8">
-              <p className="text-sm text-muted-foreground uppercase tracking-[0.3em]">KivuPass</p>
-              <h1 className="mt-4 font-syne text-3xl font-bold text-primary">{pageTitle}</h1>
-              <p className="mt-3 text-sm text-muted-foreground">Connectez-vous ou inscrivez-vous pour accéder à votre espace {tab === "signup" ? `${AGORA_SPACE_NAME} ou ${ADMIN_SPACE_NAME.toLowerCase()}` : "personnel"}.</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => setTab("login")}
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold ${tab === "login" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-              >
-                Connexion
-              </button>
-              <button
-                onClick={() => setTab("signup")}
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold ${tab === "signup" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-              >
-                Inscription
-              </button>
-            </div>
-          </div>
-          <div className="p-10 lg:p-12">
-            <form onSubmit={tab === "signup" ? handleSignup : handleLogin} className="space-y-5">
-              {tab === "signup" && (
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">Nom complet</label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Nom complet"
-                    className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nom@exemple.com"
-                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Mot de passe</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mot de passe"
-                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-opacity-90 transition"
-              >
-                {isLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : tab === "signup" ? "Créer mon compte" : "Se connecter"}
-              </button>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <button type="button" onClick={() => navigate(tab === "signup" ? "/login" : "/signup")} className="text-primary hover:underline">
-                  {tab === "signup" ? "J’ai déjà un compte" : "Je crée un compte"}
-                </button>
-                {tab === "login" && (
-                  <button type="button" onClick={() => navigate("/reset-password")} className="text-primary hover:underline">
-                    Mot de passe oublié ?
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
+    <main className="auth-scene">
+      <div className="auth-scene__shade" />
+      <a className="auth-back" href="/" aria-label="Retour à l’accueil"><ArrowLeft size={17} /> Accueil</a>
+      <section className="auth-card" aria-labelledby="auth-title">
+        <div className="auth-brand" aria-label="KivuPass"><TicketCheck size={27} strokeWidth={1.7} /><span>KIVUPASS</span></div>
+        <div className="auth-heading">
+          <p className="auth-eyebrow">VOS MOMENTS, VOTRE PASS</p>
+          <h1 id="auth-title">{tab === "signup" ? "Rejoignez l’aventure." : "Heureux de vous revoir."}</h1>
+          <p>{tab === "signup" ? `Créez votre compte pour découvrir ${AGORA_SPACE_NAME} et ${ADMIN_SPACE_NAME.toLowerCase()}.` : "Connectez-vous pour retrouver vos billets et vos événements."}</p>
         </div>
-      </div>
-    </div>
+
+        <div className="auth-tabs" role="tablist" aria-label="Accès au compte">
+          <button type="button" role="tab" aria-selected={tab === "login"} className={tab === "login" ? "is-active" : ""} onClick={() => changeTab("login")}>Connexion</button>
+          <button type="button" role="tab" aria-selected={tab === "signup"} className={tab === "signup" ? "is-active" : ""} onClick={() => changeTab("signup")}>Créer un compte</button>
+        </div>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {tab === "signup" && <label className="auth-field"><span>Nom complet</span><div className="auth-input-wrap"><UserRound size={18} /><input autoComplete="name" value={name} onChange={e => setName(e.target.value)} placeholder="Votre nom" required /></div></label>}
+          <label className="auth-field"><span>Adresse e-mail</span><div className="auth-input-wrap"><Mail size={18} /><input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" required /></div></label>
+          <label className="auth-field"><span>Mot de passe</span><div className="auth-input-wrap"><LockKeyhole size={18} /><input type={showPassword ? "text" : "password"} autoComplete={tab === "signup" ? "new-password" : "current-password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} /><button className="auth-password-toggle" type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></label>
+          {tab === "login" && <div className="auth-forgot"><button type="button" onClick={() => navigate("/reset-password")}>Mot de passe oublié ?</button></div>}
+          <button className="auth-submit" type="submit" disabled={isLoading}>{isLoading ? <Loader2 size={20} className="animate-spin" /> : tab === "signup" ? "Créer mon compte" : "Se connecter"}</button>
+        </form>
+        <div className="auth-social-divider"><span>ou continuer avec</span></div>
+        <div className="auth-social-buttons">
+          <button type="button" onClick={() => void signInSocial("google")} disabled={!!socialLoading || isLoading} aria-label="Continuer avec Google" className="auth-social-button">
+            {socialLoading === "google" ? <Loader2 size={18} className="animate-spin" /> : <span className="auth-google-mark">G</span>}
+            Continuer avec Google
+          </button>
+          <button type="button" onClick={() => void signInSocial("apple")} disabled={!!socialLoading || isLoading} aria-label="Continuer avec Apple" className="auth-social-button">
+            {socialLoading === "apple" ? <Loader2 size={18} className="animate-spin" /> : <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16.37 12.53c.02 2.22 1.95 2.96 1.97 2.97-.02.05-.31 1.06-1.02 2.1-.62.91-1.26 1.82-2.27 1.84-.99.02-1.31-.59-2.45-.59s-1.5.57-2.44.61c-.98.04-1.73-.98-2.35-1.88-1.28-1.85-2.26-5.23-.95-7.51.65-1.13 1.8-1.84 3.05-1.86.95-.02 1.84.65 2.42.65.58 0 1.67-.8 2.82-.68.48.02 1.84.19 2.71 1.52-.07.04-1.62.95-1.6 2.83ZM14.52 6.97c.51-.62.85-1.49.76-2.35-.74.03-1.64.49-2.17 1.11-.48.55-.9 1.43-.78 2.27.82.06 1.67-.42 2.19-1.03Z"/></svg>}
+            Continuer avec Apple
+          </button>
+        </div>
+        <p className="auth-switch">{tab === "login" ? "Pas encore de compte ?" : "Déjà membre ?"} <button type="button" onClick={() => changeTab(tab === "login" ? "signup" : "login")}>{tab === "login" ? "Inscrivez-vous" : "Connectez-vous"}</button></p>
+        <p className="auth-legal">En continuant, vous acceptez nos conditions d’utilisation et notre politique de confidentialité.</p>
+      </section>
+      <p className="auth-caption">Les bons événements commencent ici <span>·</span> Kigali, Rwanda</p>
+    </main>
   );
 };
 

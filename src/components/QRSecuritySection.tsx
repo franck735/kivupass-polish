@@ -14,15 +14,14 @@ const QRSecuritySection = () => (
           Sécurité <span className="text-primary">anti-fraude</span>
         </h2>
         <p className="text-muted-foreground leading-relaxed mb-6">
-          Chaque billet KivuPass est protégé par un QR Code unique qui ne peut être validé qu'une seule fois.
-          Fini les copies et les fraudes à l'entrée.
+          Chaque billet approuvé possède un QR code associé à son identifiant. À l'entrée, l'organisateur vérifie le billet et le marque comme utilisé.
         </p>
         <ul className="space-y-3">
           {[
-            "QR Code unique par billet",
-            "Validation instantanée à l'entrée",
-            "Impossible à dupliquer ou falsifier",
-            "Historique de validation en temps réel",
+            "Un identifiant par billet",
+            "Vérification du paiement avant l'entrée",
+            "Un billet déjà validé est signalé",
+            "Contrôle par l'organisateur de l'événement",
           ].map((item) => (
             <li key={item} className="flex items-center gap-3 text-sm text-foreground">
               <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />

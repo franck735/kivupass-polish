@@ -1,73 +1,23 @@
 import { motion } from "framer-motion";
-import { Ticket, QrCode, Smartphone, BarChart3 } from "lucide-react";
+import { ArrowUpRight, QrCode, Smartphone, Ticket, UsersRound } from "lucide-react";
 
 const features = [
-  {
-    icon: Ticket,
-    title: "Billetterie instantanée",
-    desc: "Créez votre billetterie en quelques minutes. Interface intuitive, personnalisation complète.",
-  },
-  {
-    icon: QrCode,
-    title: "QR Code anti-fraude",
-    desc: "Chaque billet génère un QR Code unique pour une vérification rapide. Zéro fraude, validation instantanée.",
-  },
-  {
-    icon: Smartphone,
-    title: "Paiement Mobile Money",
-    desc: "Airtel Money, Orange Money, Vodacom M-Pesa, Africel. Payez en toute sécurité depuis votre téléphone.",
-  },
-  {
-    icon: BarChart3,
-    title: "Tableau de bord temps réel",
-    desc: "Suivez vos ventes en temps réel, gérez votre public et exportez vos données depuis un seul espace.",
-  },
+  { icon: Ticket, title: "Réservez facilement", desc: "Choisissez un événement et suivez votre commande depuis votre espace." },
+  { icon: Smartphone, title: "Payez par Mobile Money", desc: "Retrouvez les consignes de paiement de l'organisateur au moment de l'achat." },
+  { icon: QrCode, title: "Présentez votre billet", desc: "Votre QR code apparaît une fois le paiement confirmé." },
+  { icon: UsersRound, title: "Organisez au même endroit", desc: "Publiez vos événements et retrouvez les commandes de votre billetterie." },
 ];
 
-const FeaturesSection = () => (
-  <section className="container py-10 md:py-14" id="about">
-    <div className="mb-10 text-center">
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="text-3xl font-display font-bold text-foreground"
-      >
-        Pourquoi <span className="text-primary">KivuPass</span> ?
-      </motion.h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.05 }}
-        className="text-muted-foreground mt-2 max-w-lg mx-auto"
-      >
-        Tout ce qu'il faut pour faire vivre vos événements de A à Z dans Agora.
-      </motion.p>
-    </div>
-
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {features.map((f, i) => (
-        <motion.div
-          key={f.title}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: i * 0.08 }}
-          className="p-6 bg-card border border-border rounded-xl transition-colors duration-150 hover:border-primary group text-center"
-        >
-          <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
-            <f.icon className="h-7 w-7" />
-          </div>
-          <h3 className="font-display font-semibold text-card-foreground group-hover:text-primary transition-colors mb-2">
-            {f.title}
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-        </motion.div>
-      ))}
-    </div>
-  </section>
-);
+const FeaturesSection = () => <section className="container py-16 md:py-24" id="features">
+  <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-start lg:gap-16">
+    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .4 }} className="lg:sticky lg:top-28">
+      <p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Une billetterie pensée pour vos sorties</p>
+      <h2 className="mt-3 font-display text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">Tout commence par une bonne sortie.</h2>
+      <p className="mt-4 max-w-lg text-base leading-7 text-slate-600">KivuPass réunit les étapes essentielles, de la découverte d’un événement au contrôle des billets à l’entrée.</p>
+      <a href="#how" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3">Découvrir le fonctionnement<ArrowUpRight size={16} /></a>
+    </motion.div>
+    <div className="grid gap-3 sm:grid-cols-2">{features.map((feature, index) => <motion.article key={feature.title} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .35, delay: index * .04 }} className="group rounded-2xl border border-border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md sm:p-6"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-white"><feature.icon size={20} /></span><h3 className="mt-5 font-display text-base font-bold text-slate-900">{feature.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{feature.desc}</p></motion.article>)}</div>
+  </div>
+</section>;
 
 export default FeaturesSection;

@@ -5,7 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ADMIN_SPACE_NAME, AGORA_SPACE_NAME, resolveDashboardPath } from "@/lib/spaces";
+import { resolveDashboardPath } from "@/lib/spaces";
 
 interface AuthModalProps {
   open: boolean;
@@ -26,7 +26,6 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
 
   // form state
   const [name, setName] = useState("");
-  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
@@ -44,7 +43,7 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
   }, [onClose]);
 
   const resetForm = () => {
-    setName(""); setFirstName(""); setEmail(""); setPassword("");
+    setName(""); setEmail(""); setPassword("");
     setForgotEmail(""); setShowForgot(false);
   };
 
@@ -54,8 +53,7 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
     e.preventDefault();
     if (!email || !password) return;
     setLoading(true);
-    const fullName = [name, firstName].filter(Boolean).join(" ");
-    const { error } = await signUp(email, password, { name: fullName });
+    const { error } = await signUp(email, password, { name });
     setLoading(false);
     if (error) {
       toast.error(error.message);
@@ -87,30 +85,6 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
       }
     }
   };
-  const quickLogins = [
-    { role: AGORA_SPACE_NAME, email: "user@kivupass.local", password: "user123" },
-    { role: `${AGORA_SPACE_NAME} Pro`, email: "org@kivupass.local", password: "org123" },
-    { role: ADMIN_SPACE_NAME, email: "admin@kivupass.local", password: "admin123" },
-  ];
-
-  const handleQuickLogin = async (emailValue: string, passwordValue: string) => {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setLoading(true);
-    const { error } = await signIn(emailValue, passwordValue);
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Connecté avec succès !");
-    handleClose();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      await redirectAfterAuth(session.user.id);
-    }
-  };
-
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail) return;
@@ -148,10 +122,10 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[2000] bg-background/85 backdrop-blur-xl flex items-center justify-center p-6 animate-in fade-in duration-300"
+      className="fixed inset-0 z-[2000] bg-background/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-300"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="bg-secondary border border-dark-4 rounded-2xl w-full max-w-[460px] p-12 relative animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
+      <div role="dialog" aria-modal="true" aria-label={tab === "signup" ? "Créer un compte KivuPass" : "Connexion à KivuPass"} className="bg-secondary border border-dark-4 rounded-2xl w-full max-w-[460px] max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-6 sm:p-10 relative animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
         <button
           onClick={handleClose}
           className="absolute top-5 right-5 w-8 h-8 bg-dark-4 rounded-full flex items-center justify-center text-muted-foreground hover:bg-dark-5 hover:text-foreground transition-all"
@@ -211,15 +185,9 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
 
             {tab === "signup" ? (
               <form onSubmit={handleSignup}>
-                <div className="grid grid-cols-2 gap-3.5 mb-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Nom</label>
-                    <input type="text" placeholder="Votre nom" value={name} onChange={e => setName(e.target.value)} className={inputClass} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Prénom</label>
-                    <input type="text" placeholder="Votre prénom" value={firstName} onChange={e => setFirstName(e.target.value)} className={inputClass} />
-                  </div>
+                <div className="mb-4">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Nom complet</label>
+                  <input type="text" placeholder="Votre nom complet" value={name} onChange={e => setName(e.target.value)} className={inputClass} autoComplete="name" />
                 </div>
                 <div className="mb-4">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Email</label>
@@ -242,21 +210,6 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
                 <div className="mb-4">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Email</label>
                   <input type="email" placeholder="nom@exemple.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
-                </div>
-                <div className="mb-4 space-y-2">
-                  <p className="text-sm text-muted-foreground">Connexion rapide :</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {quickLogins.map((item) => (
-                      <button
-                        key={item.role}
-                        type="button"
-                        onClick={() => handleQuickLogin(item.email, item.password)}
-                        className="rounded-xl border border-dark-5 px-3 py-2 text-xs font-semibold text-foreground hover:bg-dark-4 transition-all"
-                      >
-                        {item.role}
-                      </button>
-                    ))}
-                  </div>
                 </div>
                 <div className="mb-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-text-dim mb-2">Mot de passe</label>

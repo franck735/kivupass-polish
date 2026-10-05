@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { ProfilePhotoField } from "@/components/shared/ProfilePhotoField";
 
 export const AgoraProfile = () => {
   const { user, resetPassword } = useAuth();
@@ -14,6 +15,7 @@ export const AgoraProfile = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [payName, setPayName] = useState("");
   const [payPhone, setPayPhone] = useState("");
   const [payOperator, setPayOperator] = useState("Airtel Money");
@@ -26,6 +28,7 @@ export const AgoraProfile = () => {
         setName(data.name || "");
         setPhone(data.phone || "");
         setEmail(data.email || "");
+        setAvatarUrl(data.avatar_url || "");
         setPayName(data.pay_name || "");
         setPayPhone(data.pay_phone || "");
         setPayOperator(data.pay_operator || "Airtel Money");
@@ -43,6 +46,7 @@ export const AgoraProfile = () => {
       .update({
         name,
         phone,
+        avatar_url: avatarUrl || null,
         pay_name: payName || null,
         pay_phone: payPhone || null,
         pay_operator: payOperator || null,
@@ -74,13 +78,16 @@ export const AgoraProfile = () => {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+    <div>
+      <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[.16em] text-primary">Votre espace</p><h1 className="mt-1 font-syne text-2xl font-bold text-foreground">Mon profil</h1><p className="mt-1 text-sm text-muted-foreground">Gérez vos coordonnées et votre photo de profil.</p></div>
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
       <Card>
         <CardHeader>
           <CardTitle>Informations personnelles</CardTitle>
           <CardDescription>Ces informations apparaissent dans votre espace Agora et servent de base pour vos prochains événements.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ProfilePhotoField name={name} value={avatarUrl} onChange={setAvatarUrl} />
           <div>
             <label className="mb-1 block text-sm text-muted-foreground">Nom complet ou nom affiché</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. Studio Kivu" />
@@ -135,6 +142,7 @@ export const AgoraProfile = () => {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };

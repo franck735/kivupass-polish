@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole, UserRole } from "@/hooks/useUserRole";
 
@@ -16,9 +16,10 @@ const Spinner = () => (
 export const RoleGuard = ({ allowedRoles, children }: RoleGuardProps) => {
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const location = useLocation();
 
   if (authLoading || roleLoading) return <Spinner />;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   if (!role || !allowedRoles.includes(role)) return <Navigate to="/dashboard" replace />;
 
   return <>{children}</>;

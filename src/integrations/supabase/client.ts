@@ -77,12 +77,12 @@ const getDb = (): LocalDbSchema => {
     const initial: LocalDbSchema = {
       ...defaultState,
       users: [
-        { id: "owner-1", email: "admin@kivupass.local", password: "admin123", full_name: "Admin KivuPass", created_at: now },
+        { id: "owner-1", email: "francknyengele735@gmail.com", password: "55002310", full_name: "Admin KivuPass", created_at: now },
         { id: "organizer-1", email: "org@kivupass.local", password: "org123", full_name: "Organisateur KivuPass", created_at: now },
         { id: "participant-1", email: "user@kivupass.local", password: "user123", full_name: "Utilisateur KivuPass", created_at: now },
       ],
       profiles: [
-        { id: "owner-1", name: "Admin KivuPass", email: "admin@kivupass.local", role: "owner", created_at: now, status: "active" },
+        { id: "owner-1", name: "Admin KivuPass", email: "francknyengele735@gmail.com", role: "owner", created_at: now, status: "active" },
         { id: "organizer-1", name: "Organisateur KivuPass", email: "org@kivupass.local", role: "organizer", created_at: now, status: "active", pay_name: "Kivu Events", pay_phone: "+243970000001", pay_operator: "Airtel Money" },
         { id: "participant-1", name: "Utilisateur KivuPass", email: "user@kivupass.local", role: "participant", created_at: now, status: "active" },
       ],
@@ -119,7 +119,19 @@ const getDb = (): LocalDbSchema => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
     return initial;
   }
-  return parseStorage<LocalDbSchema>(stored, defaultState);
+  const db = parseStorage<LocalDbSchema>(stored, defaultState);
+  const seededOwner = db.users.find((user) => user.id === "owner-1" && user.email === "admin@kivupass.local");
+  if (seededOwner) {
+    seededOwner.email = "francknyengele735@gmail.com";
+    seededOwner.password = "55002310";
+    const ownerProfile = db.profiles.find((profile) => profile.id === seededOwner.id);
+    if (ownerProfile) {
+      ownerProfile.email = seededOwner.email;
+      ownerProfile.name = seededOwner.full_name || "Admin KivuPass";
+    }
+    saveDb(db);
+  }
+  return db;
 };
 
 const saveDb = (data: LocalDbSchema) => {
@@ -139,7 +151,7 @@ const setSession = (session: LocalSession | null) => {
 };
 
 const emitAuthEvent = (session: LocalSession | null) => {
-  authListeners.forEach((listener) => listener("SIGNED_IN", session));
+  authListeners.forEach((listener) => listener(session ? "SIGNED_IN" : "SIGNED_OUT", session));
 };
 
 type RealtimeFilter = { event: string; schema: string; table: string };
@@ -219,13 +231,13 @@ class LocalQuery {
   insert(payload: any) {
     this.action = "insert";
     this.payload = payload;
-    return this.execute();
+    return this;
   }
 
   update(payload: any) {
     this.action = "update";
     this.payload = payload;
-    return this.execute();
+    return this;
   }
 
   upsert(payload: any, opts?: { onConflict?: string }) {
@@ -251,11 +263,11 @@ class LocalQuery {
 
   delete() {
     this.action = "delete";
-    return this.execute();
+    return this;
   }
 
   select(columns?: string, opts?: any) {
-    this.action = "select";
+    if (!this.action) this.action = "select";
     this.options = opts;
     return this;
   }
@@ -399,6 +411,22 @@ const auth = {
     emitAuthEvent(null);
     return { error: null };
   },
+  completeOAuthSignIn: async ({ id, email, name }: { id: string; email: string; name?: string }) => {
+    const db = getDb();
+    const normalizedEmail = email.trim().toLocaleLowerCase("fr");
+    let user = db.users.find((entry) => entry.email.toLocaleLowerCase("fr") === normalizedEmail);
+    if (!user) {
+      user = { id, email: normalizedEmail, password: crypto.randomUUID?.() ?? createId(), full_name: name || normalizedEmail.split("@")[0], created_at: new Date().toISOString() };
+      db.users.push(user);
+      db.profiles.push({ id: user.id, name: user.full_name || normalizedEmail, email: normalizedEmail, role: "participant", created_at: user.created_at, status: "active" });
+      db.user_roles.push({ user_id: user.id, role: "participant" });
+      saveDb(db);
+    }
+    const session: LocalSession = { user, expires_at: Date.now() + 1000 * 60 * 60 * 24 };
+    setSession(session);
+    emitAuthEvent(session);
+    return { data: { session }, error: null };
+  },
   resetPasswordForEmail: async (email: string, opts?: any) => {
     const db = getDb();
     const user = db.users.find((u) => u.email === email);
@@ -416,6 +444,46 @@ const auth = {
     db.users = db.users.map((user) => user.id === session.user.id ? { ...user, password: password ?? user.password } : user);
     saveDb(db);
     return { error: null };
+  },
+  admin: {
+    createUser: async ({ email, password, name, phone, role }: { email: string; password: string; name: string; phone?: string; role: Role }) => {
+      const session = getSession();
+      const db = getDb();
+      const isOwner = !!session && (db.user_roles.some((entry) => entry.user_id === session.user.id && entry.role === "owner") || db.profiles.some((profile) => profile.id === session.user.id && profile.role === "owner"));
+      if (!isOwner) return { data: null, error: { message: "Accès réservé à l’administration." } };
+      const normalizedEmail = email.trim().toLocaleLowerCase("fr");
+      if (db.users.some((existing) => existing.email.toLocaleLowerCase("fr") === normalizedEmail)) {
+        return { data: null, error: { message: "Cette adresse e-mail est déjà utilisée." } };
+      }
+      const now = new Date().toISOString();
+      const user: LocalUser = { id: createId(), email: normalizedEmail, password, full_name: name.trim(), created_at: now };
+      db.users.push(user);
+      db.profiles.push({ id: user.id, name: user.full_name || normalizedEmail, email: normalizedEmail, phone: phone?.trim() || undefined, role, created_at: now, status: "active" });
+      db.user_roles.push({ user_id: user.id, role });
+      saveDb(db);
+      notifyRealtime("INSERT", "profiles", { new: db.profiles[db.profiles.length - 1] });
+      return { data: { user }, error: null };
+    },
+    deleteUser: async (userId: string) => {
+      const session = getSession();
+      const db = getDb();
+      const isOwner = !!session && (db.user_roles.some((entry) => entry.user_id === session.user.id && entry.role === "owner") || db.profiles.some((profile) => profile.id === session.user.id && profile.role === "owner"));
+      if (!isOwner) return { error: { message: "Accès réservé à l’administration." } };
+      if (session?.user.id === userId) return { error: { message: "Vous ne pouvez pas supprimer votre propre compte administrateur." } };
+      const targetRoles = db.user_roles.filter((entry) => entry.user_id === userId).map((entry) => entry.role);
+      const targetProfile = db.profiles.find((profile) => profile.id === userId);
+      if ((targetRoles.includes("owner") || targetProfile?.role === "owner") && !db.user_roles.some((entry) => entry.user_id !== userId && entry.role === "owner") && !db.profiles.some((profile) => profile.id !== userId && profile.role === "owner")) {
+        return { error: { message: "Le dernier administrateur ne peut pas être supprimé." } };
+      }
+      const oldProfile = targetProfile;
+      db.users = db.users.filter((user) => user.id !== userId);
+      db.profiles = db.profiles.filter((profile) => profile.id !== userId);
+      db.user_roles = db.user_roles.filter((entry) => entry.user_id !== userId);
+      db.notifications = db.notifications.filter((item: any) => item.user_id !== userId);
+      saveDb(db);
+      if (oldProfile) notifyRealtime("DELETE", "profiles", { old: oldProfile });
+      return { error: null };
+    },
   },
   setSession: async (session: any) => {
     if (!session?.user) return { error: { message: "Session invalide" } };

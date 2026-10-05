@@ -12,11 +12,8 @@ interface TicketQRProps {
 export const TicketQR = ({ ticket, open, onClose }: TicketQRProps) => {
   if (!ticket) return null;
 
-  const qrData = JSON.stringify({
-    id: ticket.id,
-    event: ticket.event_id,
-    owner: ticket.owner_id,
-  });
+  // Keep the payload compact and stable so scanner apps can read the ticket ID directly.
+  const qrData = String(ticket.id || "");
 
   const isApproved = ticket.payment_status === "approved";
 
@@ -38,7 +35,7 @@ export const TicketQR = ({ ticket, open, onClose }: TicketQRProps) => {
           {isApproved ? (
             <div className="flex flex-col items-center gap-3">
               <div className="bg-background p-4 rounded-xl border border-border inline-block">
-                <QRCodeSVG value={qrData} size={180} level="H" />
+                <QRCodeSVG value={qrData} size={220} level="M" includeMargin title={`Billet ${ticket.id}`} />
               </div>
               <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
                 <CheckCircle size={14} />

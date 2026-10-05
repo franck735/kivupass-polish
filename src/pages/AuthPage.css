@@ -1,0 +1,66 @@
+.auth-scene {
+  min-height: 100svh;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 54px 20px 62px;
+  overflow: hidden;
+  color: #f5f3e9;
+  background: radial-gradient(ellipse at 12% 78%, #26331d 0%, transparent 34%), radial-gradient(ellipse at 88% 84%, #1b3021 0%, transparent 36%), #12180f;
+  font-family: 'Inter', sans-serif;
+}
+.auth-scene::before { content: ""; position: absolute; z-index: -2; inset: 0 0 auto; height: 52vh; background: linear-gradient(180deg, transparent 38%, #12180f 100%), url("../assets/auth-forest-cabin.jpg") center top / cover no-repeat; }
+.auth-scene__shade { position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, rgb(9 15 10 / 25%), rgb(9 15 10 / 15%) 35%, transparent 62%); }
+.auth-back { position: absolute; top: 28px; left: clamp(20px, 5vw, 68px); display: inline-flex; align-items: center; gap: 9px; color: rgb(250 248 236 / 82%); text-decoration: none; font-size: 13px; transition: color .2s; }
+.auth-back:hover { color: #fffdf4; }
+.auth-card { width: min(100%, 510px); padding: 35px 42px 31px; border: 1px solid rgb(238 234 211 / 23%); border-radius: 27px; background: linear-gradient(145deg, rgb(41 49 31 / 91%), rgb(31 38 27 / 87%)); box-shadow: 0 28px 90px rgb(0 0 0 / 38%), inset 0 1px 0 rgb(255 255 255 / 8%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 25px; color: #e9e5d5; }
+.auth-brand svg { color: #e7e3d2; }
+.auth-brand span { font-family: 'Syne', sans-serif; font-weight: 700; letter-spacing: .17em; font-size: 13px; }
+.auth-heading { text-align: center; }
+.auth-eyebrow { color: #d5d0b5; font-size: 9px; font-weight: 700; letter-spacing: .2em; margin: 0 0 9px; }
+.auth-heading h1 { margin: 0; color: #f6f3e9; font-family: 'Syne', sans-serif; font-weight: 600; letter-spacing: -.045em; font-size: clamp(24px, 5vw, 31px); line-height: 1.15; }
+.auth-heading > p:last-child { color: rgb(244 241 225 / 67%); font-size: 12px; line-height: 1.6; max-width: 340px; margin: 10px auto 0; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 26px 0 23px; border-bottom: 1px solid rgb(241 236 213 / 19%); }
+.auth-tabs button { appearance: none; border: 0; background: transparent; color: rgb(244 241 225 / 53%); padding: 0 5px 13px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s, border-color .2s; }
+.auth-tabs button:hover, .auth-tabs button.is-active { color: #f8f5e9; }
+.auth-tabs button.is-active { border-color: #e4ddc6; }
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.auth-field { display: flex; flex-direction: column; gap: 8px; color: #f1eedf; font-size: 12px; font-weight: 500; }
+.auth-input-wrap { display: flex; align-items: center; min-height: 49px; gap: 11px; padding: 0 14px; border: 1px solid rgb(239 235 215 / 23%); border-radius: 12px; color: rgb(237 235 218 / 65%); background: rgb(16 22 15 / 20%); transition: border-color .2s, background .2s, box-shadow .2s; }
+.auth-input-wrap:focus-within { border-color: #d8c98e; background: rgb(13 18 12 / 38%); box-shadow: 0 0 0 3px rgb(216 201 142 / 12%); }
+.auth-input-wrap > svg { flex: 0 0 auto; }
+.auth-input-wrap input { min-width: 0; width: 100%; border: 0; outline: 0; color: #f8f5e9; background: transparent; font: inherit; font-size: 13px; }
+.auth-input-wrap input::placeholder { color: rgb(237 235 218 / 46%); }
+.auth-password-toggle { border: 0; padding: 4px; display: inline-flex; color: inherit; background: transparent; cursor: pointer; }
+.auth-forgot { margin-top: -8px; display: flex; justify-content: flex-end; }
+.auth-forgot button, .auth-switch button { border: 0; background: none; color: #e4dec5; font: inherit; cursor: pointer; }
+.auth-forgot button { padding: 2px 0; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.auth-submit { margin-top: 5px; min-height: 51px; border: 0; border-radius: 12px; display: flex; justify-content: center; align-items: center; background: #e9e4d5; color: #25291e; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: transform .2s, background .2s, box-shadow .2s; }
+.auth-submit:hover:not(:disabled) { background: #fffdf5; transform: translateY(-1px); box-shadow: 0 9px 24px rgb(0 0 0 / 18%); }
+.auth-submit:disabled { opacity: .7; cursor: wait; }
+.auth-social-divider { display: flex; align-items: center; gap: 12px; margin: 17px 0 12px; color: rgb(244 241 225 / 56%); font-size: 10px; white-space: nowrap; }
+.auth-social-divider::before, .auth-social-divider::after { content: ""; height: 1px; flex: 1; background: rgb(241 236 213 / 18%); }
+.auth-social-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.auth-social-button { min-height: 45px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 10px; border: 1px solid rgb(239 235 215 / 23%); border-radius: 11px; color: #f4f1e4; background: rgb(16 22 15 / 16%); font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; transition: border-color .2s, background .2s, transform .2s; }
+.auth-social-button:hover:not(:disabled) { border-color: rgb(239 235 215 / 50%); background: rgb(255 255 255 / 8%); transform: translateY(-1px); }
+.auth-social-button:disabled { cursor: wait; opacity: .65; }
+.auth-google-mark { font-family: Arial, sans-serif; font-size: 18px; line-height: 1; font-weight: 700; color: #4285f4; text-shadow: 1px 0 #34a853, 0 1px #fbbc05, -1px 0 #ea4335; }
+.auth-switch { text-align: center; color: rgb(244 241 225 / 72%); font-size: 12px; margin: 21px 0 0; }
+.auth-switch button { padding: 0 0 0 4px; font-size: 12px; font-weight: 700; color: #f4efd9; }
+.auth-legal { color: rgb(244 241 225 / 42%); font-size: 9px; line-height: 1.55; text-align: center; margin: 22px auto 0; max-width: 340px; }
+.auth-caption { position: absolute; bottom: 18px; left: 0; right: 0; margin: 0; text-align: center; color: rgb(246 243 233 / 68%); font-size: 10px; letter-spacing: .06em; }
+.auth-caption span { padding: 0 6px; color: #ded7b8; }
+@media (max-width: 520px) {
+  .auth-scene { align-items: flex-start; padding: 76px 14px 48px; }
+  .auth-scene::before { height: 35vh; background-image: linear-gradient(180deg, transparent 29%, #12180f 45%, #12180f 100%), url("../assets/auth-forest-cabin.jpg"); }
+  .auth-back { top: 22px; }
+  .auth-card { padding: 28px 23px 24px; border-radius: 23px; }
+  .auth-social-buttons { grid-template-columns: 1fr; }
+  .auth-brand { margin-bottom: 22px; }
+  .auth-tabs { margin-top: 23px; }
+  .auth-caption { bottom: 14px; font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) { .auth-scene *, .auth-scene *::before, .auth-scene *::after { transition-duration: .01ms !important; } }

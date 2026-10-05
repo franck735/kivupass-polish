@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Bell, Menu, Plus, Search, UserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AgoraSidebar } from "@/components/agora/AgoraSidebar";
 import { AgoraHome } from "@/components/agora/AgoraHome";
@@ -16,20 +16,13 @@ import { OrganizerSales } from "@/components/organizer/OrganizerSales";
 import { OrganizerValidation } from "@/components/organizer/OrganizerValidation";
 import { OrganizerAttendees } from "@/components/organizer/OrganizerAttendees";
 import { OrganizerMessages } from "@/components/organizer/OrganizerMessages";
-import {
-  AGORA_SECTION_DEFAULT_TAB,
-  AGORA_SECTION_TABS,
-  AGORA_TAB_META,
-  getAgoraSection,
-  type AgoraSectionId,
-  type AgoraTabId,
-} from "@/lib/agora";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AGORA_MENU_SECTIONS, AGORA_TAB_META, type AgoraTabId } from "@/lib/agora";
 
 const AgoraDashboard = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<AgoraTabId>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [quickSearch, setQuickSearch] = useState("");
 
   if (loading) {
     return (
@@ -41,8 +34,10 @@ const AgoraDashboard = () => {
 
   if (!user) return <Navigate to="/" replace />;
 
-  const activeSection = getAgoraSection(activeTab);
   const activeMeta = AGORA_TAB_META[activeTab];
+  const searchResults = quickSearch.trim()
+    ? AGORA_MENU_SECTIONS.flatMap((section) => section.items).filter((item) => item.label.toLocaleLowerCase("fr").includes(quickSearch.trim().toLocaleLowerCase("fr"))).slice(0, 5)
+    : [];
 
   const renderContent = () => {
     switch (activeTab) {
@@ -77,7 +72,7 @@ const AgoraDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-slate-50/80">
       <AgoraSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -86,35 +81,26 @@ const AgoraDashboard = () => {
       />
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="text-foreground">
+          <button aria-label="Ouvrir la navigation" onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 text-foreground hover:bg-muted">
             <Menu size={24} />
           </button>
-          <span className="font-syne text-lg font-bold text-primary">KivuPass Agora</span>
+          <span className="font-syne text-lg font-bold text-foreground">Kivu<span className="text-primary">Pass</span></span>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
-          <div className="mb-6 space-y-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/80">Agora</p>
-              <h1 className="mt-1 font-syne text-2xl font-bold text-foreground md:text-3xl">{activeMeta.title}</h1>
-              <p className="mt-2 max-w-3xl text-sm text-muted-foreground md:text-base">{activeMeta.description}</p>
+        <main className="min-w-0 flex-1 overflow-auto">
+          <header className="sticky top-0 z-30 hidden items-center justify-between border-b border-border bg-white/95 px-6 py-4 backdrop-blur md:flex xl:px-10">
+            <div className="min-w-0"><p className="text-xs font-medium text-muted-foreground">KivuPass <span className="mx-1 text-slate-300">/</span> Agora</p><h1 className="mt-1 truncate font-syne text-xl font-bold text-foreground">{activeMeta.title}</h1></div>
+            <div className="relative mx-6 hidden max-w-sm flex-1 lg:block">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input value={quickSearch} onChange={(event) => setQuickSearch(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && searchResults[0]) { setActiveTab(searchResults[0].id); setQuickSearch(""); } if (event.key === "Escape") setQuickSearch(""); }} placeholder="Rechercher dans Agora" aria-label="Rechercher une page Agora" className="h-10 w-full rounded-xl border border-border bg-slate-50/70 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10" />
+              {searchResults.length > 0 && <div className="absolute left-0 right-0 top-12 z-50 overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-lg">{searchResults.map((item) => <button key={item.id} onClick={() => { setActiveTab(item.id); setQuickSearch(""); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"><item.icon size={16} className="text-primary" />{item.label}</button>)}</div>}
             </div>
-
-            <Tabs
-              value={activeSection}
-              onValueChange={(value) => setActiveTab(AGORA_SECTION_DEFAULT_TAB[value as AgoraSectionId])}
-              className="w-full"
-            >
-              <TabsList className="grid h-auto w-full max-w-2xl grid-cols-3 rounded-xl bg-muted/70 p-1">
-                {AGORA_SECTION_TABS.map((section) => (
-                  <TabsTrigger key={section.id} value={section.id} className="rounded-lg px-3 py-2.5">
-                    {section.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {renderContent()}
+            <div className="ml-4 flex shrink-0 items-center gap-2">
+              <button aria-label="Ouvrir les notifications" onClick={() => setActiveTab("notifications")} className="relative rounded-xl border border-border p-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"><Bell size={18} /></button>
+              <button onClick={() => setActiveTab("profile")} className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"><UserRound size={16} className="text-primary" /><span className="max-w-32 truncate">{user.full_name || user.email}</span></button>
+              <button onClick={() => setActiveTab("create")} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"><Plus size={16} />Créer un événement</button>
+            </div>
+          </header>
+          <div className="mx-auto w-full max-w-[1500px] p-4 md:p-6 lg:p-8 xl:px-10">{renderContent()}</div>
         </main>
       </div>
     </div>
