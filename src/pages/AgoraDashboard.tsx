@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Bell, Menu, Plus, Search, UserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/integrations/supabase/client";
 import { AgoraSidebar } from "@/components/agora/AgoraSidebar";
 import { AgoraHome } from "@/components/agora/AgoraHome";
 import { AgoraProfile } from "@/components/agora/AgoraProfile";
