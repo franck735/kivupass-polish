@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, EyeOff, Loader2, LockKeyhole, Mail, TicketCheck, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { ADMIN_SPACE_NAME, AGORA_SPACE_NAME, resolveDashboardPath } from "@/lib/spaces";
 import "./AuthPage.css";
 
@@ -97,8 +98,13 @@ const AuthPage = ({ mode }: AuthPageProps) => {
   const signInSocial = async (provider: "google" | "apple") => {
     setSocialLoading(provider);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/login` } });
-      if (error) { setSocialLoading(null); toast.error(error.message); }
+      const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
+      if (result.error) { setSocialLoading(null); toast.error(result.error.message); return; }
+      if (result.redirected) return;
+      setSocialLoading(null);
+      toast.success("Connexion réussie !");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) navigate(await resolveDashboardPath(session.user.id), { replace: true });
     } catch (error) {
       setSocialLoading(null);
       toast.error(error instanceof Error ? error.message : "Connexion sociale impossible. Vérifiez votre connexion Internet.");

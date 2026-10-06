@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          read: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          read?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          read?: boolean
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           address: string | null
@@ -201,6 +228,63 @@ export type Database = {
           },
         ]
       }
+      payment_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          event_id: string | null
+          event_title: string | null
+          expires_at: string
+          id: string
+          operator: string | null
+          proof_url: string | null
+          sender_address: string | null
+          sender_email: string | null
+          sender_id: string
+          sender_name: string | null
+          sender_phone: string | null
+          ticket_id: string | null
+          tx_ref: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          event_id?: string | null
+          event_title?: string | null
+          expires_at?: string
+          id?: string
+          operator?: string | null
+          proof_url?: string | null
+          sender_address?: string | null
+          sender_email?: string | null
+          sender_id: string
+          sender_name?: string | null
+          sender_phone?: string | null
+          ticket_id?: string | null
+          tx_ref?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          event_id?: string | null
+          event_title?: string | null
+          expires_at?: string
+          id?: string
+          operator?: string | null
+          proof_url?: string | null
+          sender_address?: string | null
+          sender_email?: string | null
+          sender_id?: string
+          sender_name?: string | null
+          sender_phone?: string | null
+          ticket_id?: string | null
+          tx_ref?: string | null
+        }
+        Relationships: []
+      }
       payouts: {
         Row: {
           commission_usd: number
@@ -249,10 +333,11 @@ export type Database = {
           email: string | null
           id: string
           name: string | null
-          phone: string | null
           pay_name: string | null
           pay_operator: string | null
           pay_phone: string | null
+          phone: string | null
+          status: string
           updated_at: string
         }
         Insert: {
@@ -261,10 +346,11 @@ export type Database = {
           email?: string | null
           id: string
           name?: string | null
-          phone?: string | null
           pay_name?: string | null
           pay_operator?: string | null
           pay_phone?: string | null
+          phone?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -273,10 +359,11 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string | null
-          phone?: string | null
           pay_name?: string | null
           pay_operator?: string | null
           pay_phone?: string | null
+          phone?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -430,7 +517,6 @@ export type Database = {
       tickets: {
         Row: {
           approved_at: string | null
-          issued_at: string | null
           currency: string | null
           event_address: string | null
           event_date: string | null
@@ -464,7 +550,6 @@ export type Database = {
         }
         Insert: {
           approved_at?: string | null
-          issued_at?: string | null
           currency?: string | null
           event_address?: string | null
           event_date?: string | null
@@ -498,7 +583,6 @@ export type Database = {
         }
         Update: {
           approved_at?: string | null
-          issued_at?: string | null
           currency?: string | null
           event_address?: string | null
           event_date?: string | null
@@ -563,13 +647,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      purge_expired_transfers: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "owner" | "organizer" | "attendee"
@@ -588,12 +666,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -617,11 +695,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -642,11 +720,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -667,11 +745,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -684,11 +762,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
