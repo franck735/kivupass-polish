@@ -11,6 +11,13 @@ export const isAgoraSourceRole = (role?: string | null) =>
 
 export const resolveDashboardPath = async (userId: string) => {
   try {
+    const { data: roles, error: rolesError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    if (!rolesError && roles?.some(({ role }) => role === "owner")) {
+      return ADMIN_DASHBOARD_PATH;
+    }
     const { data: isOwner } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
     return isOwner ? ADMIN_DASHBOARD_PATH : AGORA_DASHBOARD_PATH;
   } catch (error) {

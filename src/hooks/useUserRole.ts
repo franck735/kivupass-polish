@@ -15,6 +15,21 @@ export const useUserRole = () => {
     setLoading(true);
     const check = async () => {
       try {
+        // The authenticated user is allowed to read their own role rows. Read
+        // them directly first so routing does not silently demote an admin if
+        // the RPC is unavailable or its result is stale.
+        const { data: rows, error: rolesError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+        if (!active) return;
+        if (!rolesError && rows) {
+          const roles = rows.map(({ role }) => role as string);
+          if (roles.includes("owner")) { setRole("owner"); return; }
+          if (roles.includes("organizer")) { setRole("organizer"); return; }
+          if (roles.includes("attendee") || roles.includes("participant")) { setRole("participant"); return; }
+        }
+
         const { data: isOwner, error } = await supabase.rpc("has_role", { _user_id: user.id, _role: "owner" });
         if (!active) return;
         if (error) console.error("Impossible de lire le rôle du compte :", error);
