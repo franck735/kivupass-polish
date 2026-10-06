@@ -67,7 +67,7 @@ const AgoraHome = ({ onNavigate }: AgoraHomeProps) => {
     return totals;
   }, {}), [confirmedOrders]);
 
-  const salesByEvent = useMemo(() => {
+  const salesByEvent = useMemo<Array<Row & { sold: number }>>(() => {
     const counts = confirmedOrders.reduce<Record<string, number>>((totals, order) => {
       const eventId = order.event_id || order.event_title || "unknown";
       totals[eventId] = (totals[eventId] || 0) + 1;
@@ -83,7 +83,7 @@ const AgoraHome = ({ onNavigate }: AgoraHomeProps) => {
       day.setDate(day.getDate() - (6 - index));
       return { key: dateKey(day), label: new Intl.DateTimeFormat("fr-FR", { weekday: "short" }).format(day).replace(".", ""), orders: 0, entries: 0 };
     });
-    const daysByKey = Object.fromEntries(days.map((day) => [day.key, day]));
+    const daysByKey: Record<string, (typeof days)[number]> = Object.fromEntries(days.map((day) => [day.key, day]));
     for (const order of confirmedOrders) {
       const key = String(order.purchased_at || order.created_at || "").slice(0, 10);
       if (daysByKey[key]) {
@@ -102,7 +102,7 @@ const AgoraHome = ({ onNavigate }: AgoraHomeProps) => {
 
   const exportOrders = () => {
     const rows = [["Billet", "Événement", "Acheteur", "Date", "Montant", "Devise", "Statut"], ...filteredOrders.map((order) => [order.id, order.event_title, order.owner_name || order.owner_email, order.purchased_at || order.created_at, order.price, order.currency, order.payment_status])];
-    const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
+    const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;

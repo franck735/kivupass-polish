@@ -37,7 +37,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
     const oauthError = params.get("error_description");
     if (oauthError) {
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
-      toast.error(decodeURIComponent(oauthError.replaceAll("+", " ")));
+      toast.error(decodeURIComponent(oauthError.replace(/\+/g, " ")));
       return;
     }
     if (!accessToken || !refreshToken) return;
@@ -80,6 +80,11 @@ const AuthPage = ({ mode }: AuthPageProps) => {
       toast.error(result.error.message);
       return;
     }
+    if (tab === "signup" && "requiresEmailConfirmation" in result && result.requiresEmailConfirmation) {
+      redirectInProgress.current = false;
+      toast.success("Compte créé. Consultez votre boîte e-mail pour confirmer l’adresse avant de vous connecter.");
+      return;
+    }
     toast.success(tab === "signup" ? "Compte créé avec succès !" : "Connecté avec succès !");
     await redirectAfterAuth();
   };
@@ -91,8 +96,13 @@ const AuthPage = ({ mode }: AuthPageProps) => {
 
   const signInSocial = async (provider: "google" | "apple") => {
     setSocialLoading(provider);
-    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/login` } });
-    if (error) { setSocialLoading(null); toast.error(error.message); }
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/login` } });
+      if (error) { setSocialLoading(null); toast.error(error.message); }
+    } catch (error) {
+      setSocialLoading(null);
+      toast.error(error instanceof Error ? error.message : "Connexion sociale impossible. Vérifiez votre connexion Internet.");
+    }
   };
 
   return (

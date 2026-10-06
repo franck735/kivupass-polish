@@ -18,11 +18,15 @@ export const resolveDashboardPath = async (userId: string) => {
     if (!rolesError && roles?.some(({ role }) => role === "owner")) {
       return ADMIN_DASHBOARD_PATH;
     }
-    const { data: isOwner } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
+    const { data: isOwner, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
+    if (error) {
+      console.error("Impossible de vérifier le rôle du compte :", error);
+      return "/dashboard";
+    }
     return isOwner ? ADMIN_DASHBOARD_PATH : AGORA_DASHBOARD_PATH;
   } catch (error) {
     console.error("Impossible de déterminer l’espace du compte :", error);
-    return AGORA_DASHBOARD_PATH;
+    return "/dashboard";
   }
 };
 

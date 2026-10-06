@@ -8,11 +8,13 @@ export const useUserRole = () => {
   const { user } = useAuth();
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) { setRole(null); setLoading(false); return; }
+    if (!user) { setRole(null); setError(null); setLoading(false); return; }
     let active = true;
     setLoading(true);
+    setError(null);
     const check = async () => {
       try {
         // The authenticated user is allowed to read their own role rows. Read
@@ -37,11 +39,17 @@ export const useUserRole = () => {
         const { data: isOrganizer, error: organizerError } = await supabase.rpc("has_role", { _user_id: user.id, _role: "organizer" });
         if (!active) return;
         if (organizerError) console.error("Impossible de lire le rôle organisateur :", organizerError);
+        if (error || organizerError) {
+          setRole(null);
+          setError("Le rôle de ce compte n’a pas pu être vérifié. Vérifiez la connexion Supabase et les règles RLS, puis rechargez la page.");
+          return;
+        }
         setRole(isOrganizer ? "organizer" : "participant");
       } catch (error) {
         if (!active) return;
         console.error("Erreur pendant la résolution du rôle :", error);
-        setRole("participant");
+        setRole(null);
+        setError("Impossible de joindre Supabase pour vérifier ce compte. Vérifiez votre connexion, puis rechargez la page.");
       } finally {
         if (active) setLoading(false);
       }
@@ -50,5 +58,5 @@ export const useUserRole = () => {
     return () => { active = false; };
   }, [user]);
 
-  return { role, loading };
+  return { role, loading, error };
 };

@@ -32,7 +32,7 @@ const Navbar = () => {
     { href: "#contact", label: "Contact" },
   ];
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+  const displayName = user?.full_name || user?.email?.split("@")[0] || "";
   const handleSignOut = async () => {
     if (signingOut) return;
     setSigningOut(true);

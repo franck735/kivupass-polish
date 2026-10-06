@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,12 +52,13 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
     e.preventDefault();
     if (!email || !password) return;
     setLoading(true);
-    const { error } = await signUp(email, password, { name });
+    const { error, requiresEmailConfirmation } = await signUp(email, password, { name });
     setLoading(false);
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Compte créé avec succès !");
+      if (requiresEmailConfirmation) toast.success("Compte créé. Consultez votre boîte e-mail pour confirmer l’adresse avant de vous connecter.");
+      else toast.success("Compte créé avec succès !");
       handleClose();
       // Auto-confirm is enabled, so user is logged in immediately
       const { data: { session } } = await supabase.auth.getSession();
@@ -101,18 +101,18 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error("Erreur Google: " + (result.error as Error).message);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/login` },
+      });
+      if (error) {
+        toast.error("Erreur Google : " + error.message);
+        setLoading(false);
+      }
+    } catch (error) {
       setLoading(false);
-    } else if (result.redirected) {
-      return; // browser redirects
-    } else {
-      toast.success("Connecté avec Google !");
-      setLoading(false);
-      handleClose();
+      toast.error("Erreur Google : " + (error instanceof Error ? error.message : "connexion impossible."));
     }
   };
 

@@ -4,11 +4,11 @@ Le client utilise `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY` dans `.
 
 ## Déployer
 
-Depuis un poste connecté au projet `hikqtxkjrzvbinxefeou` avec Supabase CLI :
+Depuis un poste connecté au projet `qwbnkbvhfzqnaqfnzxqv` avec Supabase CLI :
 
 ```sh
 supabase login
-supabase link --project-ref hikqtxkjrzvbinxefeou
+supabase link --project-ref qwbnkbvhfzqnaqfnzxqv
 supabase db push
 supabase functions deploy admin-users
 ```

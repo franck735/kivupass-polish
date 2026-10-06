@@ -13,13 +13,21 @@ interface AuthContextType {
   user: AppUser | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, meta?: { name?: string }) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, meta?: { name?: string }) => Promise<{ error: Error | null; requiresEmailConfirmation: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const authError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : "Erreur inconnue";
+  if (/failed to fetch|network|fetch error|load failed/i.test(message)) {
+    return new Error("Connexion à Supabase impossible. Vérifiez votre Internet et les variables VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY sur Vercel.");
+  }
+  return new Error(message);
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -46,20 +54,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, meta?: { name?: string }) => {
-    const { error } = await supabase.auth.signUp({
-      email: email.trim().toLocaleLowerCase("fr"),
-      password,
-      options: {
-        data: { full_name: meta?.name },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    return { error: error ? new Error(error.message) : null };
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLocaleLowerCase("fr"),
+        password,
+        options: {
+          data: { full_name: meta?.name },
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+      return { error: error ? authError(error) : null, requiresEmailConfirmation: !error && !data.session && !!data.user };
+    } catch (error) {
+      return { error: authError(error), requiresEmailConfirmation: false };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLocaleLowerCase("fr"), password });
-    return { error: error ? new Error(error.message) : null };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLocaleLowerCase("fr"), password });
+      return { error: error ? authError(error) : null };
+    } catch (error) {
+      return { error: authError(error) };
+    }
   };
 
   const signOut = async () => {
@@ -70,10 +86,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLocaleLowerCase("fr"), {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    return { error: error ? new Error(error.message) : null };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLocaleLowerCase("fr"), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      return { error: error ? authError(error) : null };
+    } catch (error) {
+      return { error: authError(error) };
+    }
   };
 
   return (

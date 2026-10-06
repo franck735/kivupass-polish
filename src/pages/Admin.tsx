@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminTickets } from "@/components/admin/AdminTickets";
@@ -18,8 +18,8 @@ import { Menu } from "lucide-react";
 
 const Admin = () => {
   const { user, loading: authLoading } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isOwner, setIsOwner] = useState<boolean | null>(null);
   const validTabs = ["dashboard", "users", "tickets", "events", "finance", "validation", "requests", "messages", "notifications", "settings", "profile"];
   const [activeTab, setActiveTab] = useState(() => {
     const requestedTab = searchParams.get("tab");
@@ -32,18 +32,11 @@ const Admin = () => {
     setSearchParams(tab === "dashboard" ? {} : { tab }, { replace: true });
   };
 
-  useEffect(() => {
-    if (!user) return;
-    supabase.rpc("has_role", { _user_id: user.id, _role: "owner" }).then(({ data }) => {
-      setIsOwner(!!data);
-    });
-  }, [user]);
-
-  if (authLoading || isOwner === null) {
+  if (authLoading || roleLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
-  if (!user || !isOwner) return <Navigate to="/" replace />;
+  if (!user || role !== "owner") return <Navigate to="/dashboard" replace />;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -58,7 +51,7 @@ const Admin = () => {
       case "notifications": return <AdminNotifications />;
       case "settings": return <AdminSettings />;
       case "profile": return <ProfilePage />;
-      default: return <AdminDashboard />;
+      default: return <AdminDashboard onOpenProfile={() => changeTab("profile")} />;
     }
   };
 
