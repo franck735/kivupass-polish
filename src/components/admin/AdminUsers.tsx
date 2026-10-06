@@ -50,7 +50,7 @@ export const AdminUsers = () => {
 
   const counts = useMemo(() => ({
     all: profiles.length,
-    participants: profiles.filter((profile) => rolesFor(profile.id).includes("participant") || (!rolesFor(profile.id).length && profile.role === "participant")).length,
+    participants: profiles.filter((profile) => rolesFor(profile.id).some((role) => role === "participant" || role === "attendee") || (!rolesFor(profile.id).length && profile.role === "participant")).length,
     organizers: profiles.filter((profile) => rolesFor(profile.id).includes("organizer") || profile.role === "organizer").length,
     owners: profiles.filter((profile) => rolesFor(profile.id).includes("owner") || profile.role === "owner").length,
   }), [profiles, roles]);
@@ -58,7 +58,7 @@ export const AdminUsers = () => {
   const visibleProfiles = useMemo(() => profiles.filter((profile) => {
     const profileRoles = rolesFor(profile.id);
     const matchesRole = filter === "all"
-      || (filter === "participants" && (profileRoles.includes("participant") || (!profileRoles.length && profile.role === "participant")))
+      || (filter === "participants" && (profileRoles.some((role) => role === "participant" || role === "attendee") || (!profileRoles.length && profile.role === "participant")))
       || (filter === "organizers" && (profileRoles.includes("organizer") || profile.role === "organizer"))
       || (filter === "owners" && (profileRoles.includes("owner") || profile.role === "owner"));
     const term = query.trim().toLocaleLowerCase("fr");
@@ -76,7 +76,10 @@ export const AdminUsers = () => {
   const createUser = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAdding(true);
-    const { error } = await supabase.auth.admin.createUser({ email: addEmail, password: addPassword, name: addName, phone: addPhone, role: addRole });
+    const { error } = await supabase.functions.invoke("admin-users", { body: {
+      action: "create", email: addEmail.trim().toLocaleLowerCase("fr"), password: addPassword,
+      name: addName.trim(), phone: addPhone.trim(), role: addRole,
+    } });
     setAdding(false);
     if (error) { toast.error(error.message || "Impossible de créer cet utilisateur."); return; }
     setAddOpen(false);
@@ -88,7 +91,7 @@ export const AdminUsers = () => {
   const deleteUser = async () => {
     if (!selected) return;
     setDeleting(true);
-    const { error } = await supabase.auth.admin.deleteUser(selected.id);
+    const { error } = await supabase.functions.invoke("admin-users", { body: { action: "delete", user_id: selected.id } });
     setDeleting(false);
     if (error) { toast.error(error.message || "Impossible de supprimer cet utilisateur."); return; }
     setProfiles((current) => current.filter((profile) => profile.id !== selected.id));

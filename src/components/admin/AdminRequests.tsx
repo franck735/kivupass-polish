@@ -6,15 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { CheckCircle, XCircle } from "lucide-react";
 
-const SYSTEM_EMAIL = "support@kivupass.local";
-
 export const AdminRequests = () => {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     const { data } = await supabase.from("pub_requests").select("*").order("created_at", { ascending: false });
-    setRequests(data || []);
+    const decorated = await Promise.all((data || []).map(async (request: any) => {
+      const proof = request.proof_image;
+      if (!proof || proof.startsWith("http")) return { ...request, proof_display_url: proof };
+      const { data: signed } = await supabase.storage.from("publication-proofs").createSignedUrl(proof, 3600);
+      return { ...request, proof_display_url: signed?.signedUrl || null };
+    }));
+    setRequests(decorated);
     setLoading(false);
   };
 
@@ -29,57 +33,14 @@ export const AdminRequests = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const approve = async (req: any) => {
-    await supabase.from("events").insert({
-      id: req.event_id,
-      title: req.event_title || "Sans titre",
-      category: req.event_category || "autre",
-      description: req.event_description,
-      date: req.event_date,
-      time: req.event_time,
-      address: req.event_address,
-      price: req.event_price || 0,
-      currency: req.event_currency || "USD",
-      capacity: req.event_capacity,
-      image: req.event_image,
-      organizer_id: req.organizer_id,
-      organizer_name: req.organizer_name,
-      payment_name: req.org_pay_name,
-      payment_phone: req.org_pay_phone,
-      payment_operator: req.org_pay_operator,
-      status: "published",
-      approved: true,
-    });
-
-    await supabase.from("pub_requests").update({ status: "approved", approved_at: new Date().toISOString() }).eq("id", req.id);
-    if (req.organizer_id) {
-      await supabase.from("user_roles").upsert({ user_id: req.organizer_id, role: "organizer" }, { onConflict: "user_id,role" });
-    }
-    if (req.organizer_id) {
-      await supabase.from("notifications").insert({
-        user_id: req.organizer_id,
-        message: `Email de ${SYSTEM_EMAIL} : votre demande Agora pour l'événement "${req.event_title}" a été approuvée. L'événement sera publié prochainement.`,
-        type: "email",
-        read: false,
-      });
-    }
-    toast.success("Demande approuvée, événement publié dans Agora !");
-    load();
-  };
-
-  const reject = async (id: string) => {
-    const { data } = await supabase.from("pub_requests").select("*").eq("id", id).single();
-    await supabase.from("pub_requests").update({ status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
-    if (data?.organizer_id) {
-      await supabase.from("notifications").insert({
-        user_id: data.organizer_id,
-        message: `Email de ${SYSTEM_EMAIL} : votre demande Agora pour l'événement "${data.event_title}" a été refusée. Vérifiez les informations et soumettez à nouveau si nécessaire.`,
-        type: "email",
-        read: false,
-      });
-    }
-    toast.success("Demande rejetée");
-    load();
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const decide = async (id: string, decision: "approved" | "rejected") => {
+    setBusyId(id);
+    const { data, error } = await supabase.rpc("decide_publication_request", { _request_id: id, _decision: decision });
+    setBusyId(null);
+    if (error || !data) { toast.error(error?.message || "Cette demande a déjà été traitée."); return; }
+    toast.success(decision === "approved" ? "Demande approuvée et événement publié" : "Demande refusée");
+    await load();
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -117,17 +78,17 @@ export const AdminRequests = () => {
                 </div>
                 <div className="space-y-2">
                   <p className="font-semibold text-foreground">Transaction</p>
-                  <p className="text-sm text-muted-foreground">ID : {r.transaction_id || "Aucun"}</p>
+                  <p className="text-sm text-muted-foreground">ID : {r.tx_ref || "Aucun"}</p>
                   <p className="text-sm text-muted-foreground">Prix demandé : {r.event_price} {r.event_currency}</p>
                   <p className="text-sm text-muted-foreground">Capacité : {r.event_capacity || "—"}</p>
                 </div>
               </div>
 
-              {r.publication_proof_url ? (
+              {r.proof_display_url ? (
                 <div>
                   <p className="font-semibold text-foreground">Preuve de paiement</p>
                   <div className="border border-border rounded-lg overflow-hidden bg-black/5">
-                    <img src={r.publication_proof_url} alt="Preuve de paiement" className="w-full h-48 object-contain" />
+                    <img src={r.proof_display_url} alt="Preuve de paiement" className="w-full h-48 object-contain" />
                   </div>
                 </div>
               ) : (
@@ -136,11 +97,11 @@ export const AdminRequests = () => {
                 </div>
               )}
 
-              {r.event_poster_url ? (
+              {r.event_image ? (
                 <div>
                   <p className="font-semibold text-foreground">Affiche proposée</p>
                   <div className="border border-border rounded-lg overflow-hidden">
-                    <img src={r.event_poster_url} alt="Affiche événement" className="w-full h-48 object-contain bg-black/5" />
+                    <img src={r.event_image} alt="Affiche événement" className="w-full h-48 object-contain bg-black/5" />
                   </div>
                 </div>
               ) : null}
@@ -155,8 +116,8 @@ export const AdminRequests = () => {
               <div className="flex flex-wrap gap-2">
                 {r.status === "pending" ? (
                   <>
-                    <Button size="sm" variant="ghost" className="text-green-400" onClick={() => approve(r)}><CheckCircle size={16} /> Approuver</Button>
-                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => reject(r.id)}><XCircle size={16} /> Rejeter</Button>
+                    <Button disabled={busyId === r.id} size="sm" variant="ghost" className="text-green-400" onClick={() => decide(r.id, "approved")}><CheckCircle size={16} /> Approuver</Button>
+                    <Button disabled={busyId === r.id} size="sm" variant="ghost" className="text-destructive" onClick={() => decide(r.id, "rejected")}><XCircle size={16} /> Rejeter</Button>
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground">Dernière mise à jour : {r.status === "approved" ? "Approuvée" : "Rejetée"}</p>

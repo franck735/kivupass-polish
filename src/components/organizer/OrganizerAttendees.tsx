@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Users } from "lucide-react";
+import { Download, Send, Users } from "lucide-react";
 import { exportCSV } from "@/lib/csv";
+import { toast } from "sonner";
 
 export const OrganizerAttendees = () => {
   const { user } = useAuth();
@@ -27,6 +28,14 @@ export const OrganizerAttendees = () => {
   }, [user]);
 
   const filtered = selectedEvent === "all" ? tickets : tickets.filter((t) => t.event_id === selectedEvent);
+
+  const issueTicket = async (ticket: any) => {
+    if (!user || ticket.payment_status !== "approved" || ticket.issued_at) return;
+    const { data: issuedAt, error } = await supabase.rpc("issue_ticket", { _ticket_id: ticket.id });
+    if (error || !issuedAt) { toast.error("Ce billet ne peut pas être envoyé avant l’approbation du paiement."); return; }
+    setTickets((current) => current.map((item) => item.id === ticket.id ? { ...item, issued_at: issuedAt } : item));
+    toast.success("Billet envoyé au participant.");
+  };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -61,7 +70,7 @@ export const OrganizerAttendees = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-border text-muted-foreground text-left">
-                  <th className="p-3">Nom</th><th className="p-3">Téléphone</th><th className="p-3">Événement</th><th className="p-3">Statut</th>
+                  <th className="p-3">Nom</th><th className="p-3">Téléphone</th><th className="p-3">Événement</th><th className="p-3">Paiement</th><th className="p-3">Billet</th>
                 </tr></thead>
                 <tbody>
                   {filtered.map((t) => (
@@ -70,9 +79,12 @@ export const OrganizerAttendees = () => {
                       <td className="p-3 text-muted-foreground">{t.owner_phone || "—"}</td>
                       <td className="p-3 text-muted-foreground">{t.event_title}</td>
                       <td className="p-3">
-                        <Badge variant="outline" className={t.payment_status === "approved" ? "border-green-500 text-green-400" : "border-primary text-primary"}>
-                          {t.payment_status === "approved" ? "Payé" : "En attente"}
+                        <Badge variant="outline" className={t.payment_status === "approved" ? "border-green-500 text-green-600" : t.payment_status === "rejected" ? "border-destructive text-destructive" : "border-primary text-primary"}>
+                          {t.payment_status === "approved" ? "Approuvé" : t.payment_status === "rejected" ? "Refusé" : "En attente admin"}
                         </Badge>
+                      </td>
+                      <td className="p-3">
+                        {t.payment_status === "approved" ? t.issued_at ? <Badge variant="outline" className="border-green-500 text-green-600">Envoyé</Badge> : <Button size="sm" className="gap-1.5" onClick={() => issueTicket(t)}><Send size={13} />Envoyer le billet</Button> : <span className="text-xs text-muted-foreground">Après validation admin</span>}
                       </td>
                     </tr>
                   ))}

@@ -40,7 +40,9 @@ export const OrganizerMessages = () => {
     });
     setSending(false);
     if (error) toast.error(error.message);
-    else { setText(""); toast.success("Message envoyé"); }
+    else {
+      setText(""); toast.success("Message envoyé à l’administration");
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;

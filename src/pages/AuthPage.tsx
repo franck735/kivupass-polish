@@ -1,10 +1,9 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, EyeOff, Loader2, LockKeyhole, Mail, TicketCheck, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { ADMIN_SPACE_NAME, AGORA_SPACE_NAME, resolveDashboardPath } from "@/lib/spaces";
 import "./AuthPage.css";
 
@@ -21,10 +20,11 @@ const AuthPage = ({ mode }: AuthPageProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "apple" | null>(null);
+  const redirectInProgress = useRef(false);
 
   useEffect(() => setTab(mode), [mode]);
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !redirectInProgress.current) {
       const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
       navigate(from ? `${from.pathname || "/dashboard"}${from.search || ""}${from.hash || ""}` : "/dashboard", { replace: true });
     }
@@ -33,23 +33,23 @@ const AuthPage = ({ mode }: AuthPageProps) => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.slice(1));
     const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
     const oauthError = params.get("error_description");
     if (oauthError) {
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
       toast.error(decodeURIComponent(oauthError.replaceAll("+", " ")));
       return;
     }
-    if (!accessToken) return;
+    if (!accessToken || !refreshToken) return;
+    redirectInProgress.current = true;
     setSocialLoading("google");
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
-    void lovable.auth.completeOAuthSignIn(accessToken)
-      .then(async (oauthUser) => {
-        if (!oauthUser.email) throw new Error("Le fournisseur n’a pas retourné d’adresse e-mail.");
-        const result = await supabase.auth.completeOAuthSignIn({ id: oauthUser.id, email: oauthUser.email, name: oauthUser.user_metadata?.full_name || oauthUser.user_metadata?.name });
-        if (result.error) throw new Error(result.error.message);
+    void supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(async ({ data, error }) => {
+        if (error) throw error;
         toast.success("Connexion réussie !");
         const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
-        navigate(from ? `${from.pathname || "/dashboard"}${from.search || ""}${from.hash || ""}` : await resolveDashboardPath(result.data.session.user.id), { replace: true });
+        navigate(from ? `${from.pathname || "/dashboard"}${from.search || ""}${from.hash || ""}` : await resolveDashboardPath(data.session.user.id), { replace: true });
       })
       .catch((error: Error) => toast.error(error.message || "Connexion impossible. Réessayez."))
       .finally(() => setSocialLoading(null));
@@ -70,11 +70,13 @@ const AuthPage = ({ mode }: AuthPageProps) => {
     event.preventDefault();
     if (!email || !password) return;
     setIsLoading(true);
+    redirectInProgress.current = true;
     const result = tab === "signup"
       ? await signUp(email, password, { name: name.trim() })
       : await signIn(email, password);
     setIsLoading(false);
     if (result.error) {
+      redirectInProgress.current = false;
       toast.error(result.error.message);
       return;
     }
@@ -89,7 +91,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
 
   const signInSocial = async (provider: "google" | "apple") => {
     setSocialLoading(provider);
-    const { error } = await lovable.auth.signInWithOAuth(provider);
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/login` } });
     if (error) { setSocialLoading(null); toast.error(error.message); }
   };
 

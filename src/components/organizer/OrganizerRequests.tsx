@@ -13,7 +13,16 @@ export const OrganizerRequests = () => {
   useEffect(() => {
     if (!user) return;
     supabase.from("pub_requests").select("*").eq("organizer_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => { setRequests(data || []); setLoading(false); });
+      .then(async ({ data }) => {
+        const decorated = await Promise.all((data || []).map(async (request: any) => {
+          const proof = request.proof_image;
+          if (!proof || proof.startsWith("http")) return { ...request, proof_display_url: proof };
+          const { data: signed } = await supabase.storage.from("publication-proofs").createSignedUrl(proof, 3600);
+          return { ...request, proof_display_url: signed?.signedUrl || null };
+        }));
+        setRequests(decorated);
+        setLoading(false);
+      });
   }, [user]);
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -46,7 +55,7 @@ export const OrganizerRequests = () => {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <p className="font-semibold text-foreground">Transaction</p>
-                    <p className="text-sm text-muted-foreground">ID : {r.transaction_id || "—"}</p>
+                    <p className="text-sm text-muted-foreground">ID : {r.tx_ref || "—"}</p>
                     <p className="text-sm text-muted-foreground">Téléphone paiement : {r.org_pay_operator} {r.org_pay_phone}</p>
                     <p className="text-sm text-muted-foreground">Frais de publication : {r.publication_fee_phone || "—"}</p>
                   </div>
@@ -57,19 +66,19 @@ export const OrganizerRequests = () => {
                     {r.rejected_at && <p className="text-sm text-muted-foreground">Rejeté le {new Date(r.rejected_at).toLocaleString("fr-FR")}</p>}
                   </div>
                 </div>
-                {r.publication_proof_url && (
+                {r.proof_display_url && (
                   <div>
                     <p className="font-semibold text-foreground">Preuve de paiement</p>
                     <div className="border border-border rounded-lg overflow-hidden bg-black/5">
-                      <img src={r.publication_proof_url} alt="Preuve de paiement" className="w-full h-48 object-contain" />
+                      <img src={r.proof_display_url} alt="Preuve de paiement" className="w-full h-48 object-contain" />
                     </div>
                   </div>
                 )}
-                {r.event_poster_url && (
+                {r.event_image && (
                   <div>
                     <p className="font-semibold text-foreground">Affiche</p>
                     <div className="border border-border rounded-lg overflow-hidden bg-black/5">
-                      <img src={r.event_poster_url} alt="Affiche événement" className="w-full h-48 object-contain" />
+                      <img src={r.event_image} alt="Affiche événement" className="w-full h-48 object-contain" />
                     </div>
                   </div>
                 )}

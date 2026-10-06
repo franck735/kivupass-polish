@@ -244,27 +244,39 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string | null
           id: string
           name: string | null
           phone: string | null
+          pay_name: string | null
+          pay_operator: string | null
+          pay_phone: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           id: string
           name?: string | null
           phone?: string | null
+          pay_name?: string | null
+          pay_operator?: string | null
+          pay_phone?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string | null
           phone?: string | null
+          pay_name?: string | null
+          pay_operator?: string | null
+          pay_phone?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -418,6 +430,7 @@ export type Database = {
       tickets: {
         Row: {
           approved_at: string | null
+          issued_at: string | null
           currency: string | null
           event_address: string | null
           event_date: string | null
@@ -451,6 +464,7 @@ export type Database = {
         }
         Insert: {
           approved_at?: string | null
+          issued_at?: string | null
           currency?: string | null
           event_address?: string | null
           event_date?: string | null
@@ -484,6 +498,7 @@ export type Database = {
         }
         Update: {
           approved_at?: string | null
+          issued_at?: string | null
           currency?: string | null
           event_address?: string | null
           event_date?: string | null

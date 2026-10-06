@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -5,6 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ADMIN_SPACE_NAME } from "@/lib/spaces";
+import { supabase } from "@/integrations/supabase/client";
 
 const menuItems = [
   { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -25,6 +27,17 @@ interface Props { activeTab: string; onTabChange: (tab: string) => void; open: b
 export const AdminSidebar = ({ activeTab, onTabChange, open }: Props) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const [pendingPayments, setPendingPayments] = useState(0);
+
+  useEffect(() => {
+    const loadPending = () => supabase.from("tickets").select("id", { count: "exact", head: true }).eq("payment_status", "pending")
+      .then(({ count }) => setPendingPayments(count || 0));
+    loadPending();
+    const channel = supabase.channel("admin-pending-ticket-requests").on("postgres_changes", {
+      event: "INSERT", schema: "public", table: "tickets",
+    }, loadPending).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   return (
     <aside className={cn(
@@ -45,6 +58,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, open }: Props) => {
           )}>
             <item.icon size={18} />
             {item.label}
+            {item.id === "tickets" && pendingPayments > 0 && <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">{pendingPayments > 99 ? "99+" : pendingPayments}</span>}
           </button>
         ))}
       </nav>

@@ -12,6 +12,7 @@ export const AdminTickets = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [proofView, setProofView] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = async () => {
     const { data } = await supabase.from("tickets").select("*").order("purchased_at", { ascending: false });
@@ -22,15 +23,20 @@ export const AdminTickets = () => {
   useEffect(() => { load(); }, []);
 
   const approve = async (id: string) => {
-    await supabase.from("tickets").update({ payment_status: "approved", payment_approved: true, approved_at: new Date().toISOString() }).eq("id", id);
-    toast.success("Billet approuvé");
-    load();
+    await decide(id, "approved");
   };
 
   const reject = async (id: string) => {
-    await supabase.from("tickets").update({ payment_status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
-    toast.success("Billet rejeté");
-    load();
+    await decide(id, "rejected");
+  };
+
+  const decide = async (id: string, decision: "approved" | "rejected") => {
+    setBusyId(id);
+    const { data, error } = await supabase.rpc("decide_ticket_payment", { _ticket_id: id, _decision: decision });
+    setBusyId(null);
+    if (error || !data) { toast.error(error?.message || "Cette demande a déjà été traitée."); return; }
+    toast.success(decision === "approved" ? "Paiement approuvé" : "Paiement refusé");
+    await load();
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -61,14 +67,19 @@ export const AdminTickets = () => {
                     </td>
                     <td className="p-3">
                       {t.proof_image_url ? (
-                        <Button size="sm" variant="ghost" onClick={() => setProofView(t.proof_image_url)}><Eye size={14} /></Button>
+                        <Button size="sm" variant="ghost" onClick={async () => {
+                          const proof = t.proof_image_url as string;
+                          if (proof.startsWith("http")) { setProofView(proof); return; }
+                          const { data, error } = await supabase.storage.from("payment-proofs").createSignedUrl(proof, 3600);
+                          if (error) toast.error("Preuve inaccessible"); else setProofView(data.signedUrl);
+                        }}><Eye size={14} /></Button>
                       ) : "—"}
                     </td>
                     <td className="p-3">
                       {t.payment_status === "pending" && (
                         <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" className="text-green-400" onClick={() => approve(t.id)}><CheckCircle size={16} /></Button>
-                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => reject(t.id)}><XCircle size={16} /></Button>
+                          <Button disabled={busyId === t.id} size="sm" variant="ghost" className="text-green-400" onClick={() => approve(t.id)}><CheckCircle size={16} /></Button>
+                          <Button disabled={busyId === t.id} size="sm" variant="ghost" className="text-destructive" onClick={() => reject(t.id)}><XCircle size={16} /></Button>
                         </div>
                       )}
                     </td>

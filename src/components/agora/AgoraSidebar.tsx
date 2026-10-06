@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Home, LogOut } from "lucide-react";
 import { AGORA_SPACE_NAME } from "@/lib/spaces";
 import { AGORA_MENU_SECTIONS, type AgoraTabId } from "@/lib/agora";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface Props {
   activeTab: AgoraTabId;
@@ -13,6 +14,7 @@ interface Props {
 
 export const AgoraSidebar = ({ activeTab, onTabChange, open, onClose }: Props) => {
   const { signOut, user } = useAuth();
+  const { role } = useUserRole();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -45,7 +47,7 @@ export const AgoraSidebar = ({ activeTab, onTabChange, open, onClose }: Props) =
         </div>
 
         <nav aria-label="Navigation Agora" className="flex-1 space-y-5 overflow-y-auto p-3">
-          {AGORA_MENU_SECTIONS.map((section) => (
+          {AGORA_MENU_SECTIONS.filter((section) => role === "organizer" || section.title !== "Organisation").map((section) => (
             <div key={section.title}>
               <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/75">
                 {section.title}

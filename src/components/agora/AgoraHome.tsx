@@ -96,7 +96,7 @@ const AgoraHome = ({ onNavigate }: AgoraHomeProps) => {
 
   const filteredOrders = useMemo(() => orders
     .filter((order) => orderFilter === "all" || order.payment_status === orderFilter)
-    .filter((order) => !search.trim() || `${order.event_title || ""} ${order.owner_name || ""} ${order.owner_email || ""} ${order.transaction_id || ""}`.toLocaleLowerCase("fr").includes(search.trim().toLocaleLowerCase("fr")))
+    .filter((order) => !search.trim() || `${order.event_title || ""} ${order.owner_name || ""} ${order.owner_email || ""} ${order.tx_ref || order.transaction_id || ""}`.toLocaleLowerCase("fr").includes(search.trim().toLocaleLowerCase("fr")))
     .sort((a, b) => String(b.purchased_at || b.created_at || "").localeCompare(String(a.purchased_at || a.created_at || "")))
     .slice(0, 8), [orders, orderFilter, search]);
 

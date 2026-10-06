@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Bell, Menu, Plus, Search, UserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { AgoraSidebar } from "@/components/agora/AgoraSidebar";
 import { AgoraHome } from "@/components/agora/AgoraHome";
 import { AgoraProfile } from "@/components/agora/AgoraProfile";
@@ -20,9 +21,28 @@ import { AGORA_MENU_SECTIONS, AGORA_TAB_META, type AgoraTabId } from "@/lib/agor
 
 const AgoraDashboard = () => {
   const { user, loading } = useAuth();
+  const { role } = useUserRole();
   const [activeTab, setActiveTab] = useState<AgoraTabId>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [quickSearch, setQuickSearch] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadUnread = () => supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false)
+      .then(({ count }) => setUnreadCount(count || 0));
+    loadUnread();
+    const channel = supabase.channel(`notifications-${user.id}`).on("postgres_changes", {
+      event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}`,
+    }, loadUnread).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  useEffect(() => {
+    if (role === "participant" && ["home", "create", "events", "requests", "sales", "validate", "attendees", "messages"].includes(activeTab)) {
+      setActiveTab("explore");
+    }
+  }, [role, activeTab]);
 
   if (loading) {
     return (
@@ -42,7 +62,7 @@ const AgoraDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "home":
-        return <AgoraHome onNavigate={setActiveTab} />;
+        return role === "organizer" ? <AgoraHome onNavigate={setActiveTab} /> : <ParticipantExplore />;
       case "tickets":
         return <ParticipantTickets />;
       case "orders":
@@ -80,11 +100,14 @@ const AgoraDashboard = () => {
         onClose={() => setSidebarOpen(false)}
       />
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 lg:hidden">
+        <header className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 lg:hidden">
+          <div className="flex items-center gap-3">
           <button aria-label="Ouvrir la navigation" onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 text-foreground hover:bg-muted">
             <Menu size={24} />
           </button>
           <span className="font-syne text-lg font-bold text-foreground">Kivu<span className="text-primary">Pass</span></span>
+          </div>
+          <button aria-label={`Ouvrir les notifications${unreadCount ? `, ${unreadCount} non lues` : ""}`} onClick={() => setActiveTab("notifications")} className="relative rounded-xl border border-border p-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"><Bell size={18} />{unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}</button>
         </header>
         <main className="min-w-0 flex-1 overflow-auto">
           <header className="sticky top-0 z-30 hidden items-center justify-between border-b border-border bg-white/95 px-6 py-4 backdrop-blur md:flex xl:px-10">
@@ -95,7 +118,7 @@ const AgoraDashboard = () => {
               {searchResults.length > 0 && <div className="absolute left-0 right-0 top-12 z-50 overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-lg">{searchResults.map((item) => <button key={item.id} onClick={() => { setActiveTab(item.id); setQuickSearch(""); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"><item.icon size={16} className="text-primary" />{item.label}</button>)}</div>}
             </div>
             <div className="ml-4 flex shrink-0 items-center gap-2">
-              <button aria-label="Ouvrir les notifications" onClick={() => setActiveTab("notifications")} className="relative rounded-xl border border-border p-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"><Bell size={18} /></button>
+              <button aria-label={`Ouvrir les notifications${unreadCount ? `, ${unreadCount} non lues` : ""}`} onClick={() => setActiveTab("notifications")} className="relative rounded-xl border border-border p-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"><Bell size={18} />{unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white">{unreadCount > 99 ? "99+" : unreadCount}</span>}</button>
               <button onClick={() => setActiveTab("profile")} className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"><UserRound size={16} className="text-primary" /><span className="max-w-32 truncate">{user.full_name || user.email}</span></button>
               <button onClick={() => setActiveTab("create")} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"><Plus size={16} />Créer un événement</button>
             </div>

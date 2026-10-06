@@ -95,8 +95,7 @@ useEffect(() => {
         setSaving(false);
         return;
       }
-      const { data: urlData } = supabase.storage.from("publication-proofs").getPublicUrl(path);
-      proofUrl = urlData.publicUrl;
+      proofUrl = path;
     }
 
     if (posterFile) {
@@ -136,9 +135,9 @@ useEffect(() => {
       org_pay_name: form.payName,
       org_pay_phone: form.payPhone,
       org_pay_operator: form.payOperator,
-      transaction_id: transactionId || null,
-      publication_proof_url: proofUrl,
-      event_poster_url: posterUrl,
+      tx_ref: transactionId || null,
+      proof_image: proofUrl,
+      event_image: posterUrl,
       publication_fee_phone: form.publication_fee_phone,
       status: "pending",
     });

@@ -15,7 +15,7 @@ export const TicketQR = ({ ticket, open, onClose }: TicketQRProps) => {
   // Keep the payload compact and stable so scanner apps can read the ticket ID directly.
   const qrData = String(ticket.id || "");
 
-  const isApproved = ticket.payment_status === "approved";
+  const isIssued = ticket.payment_status === "approved" && (Boolean(ticket.issued_at) || ticket.issued_at === undefined);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -32,20 +32,20 @@ export const TicketQR = ({ ticket, open, onClose }: TicketQRProps) => {
             {ticket.event_address && <span className="flex items-center gap-1"><MapPin size={12} />{ticket.event_address}</span>}
           </div>
 
-          {isApproved ? (
+          {isIssued ? (
             <div className="flex flex-col items-center gap-3">
-              <div className="bg-background p-4 rounded-xl border border-border inline-block">
-                <QRCodeSVG value={qrData} size={220} level="M" includeMargin title={`Billet ${ticket.id}`} />
+              <div className="inline-flex max-w-full items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <QRCodeSVG value={qrData} size={260} level="H" includeMargin title={`QR code officiel du billet ${ticket.id}`} role="img" aria-label={`QR code du billet ${ticket.id}`} />
               </div>
-              <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
+              <div className="flex items-center gap-1 text-green-700 text-sm font-semibold">
                 <CheckCircle size={14} />
-                Billet validé
+                Billet émis · prêt à présenter à l’entrée
               </div>
             </div>
           ) : (
             <div className="py-6 text-muted-foreground">
-              <p className="text-sm">Le QR code sera disponible une fois le paiement approuvé.</p>
-              <Badge className="mt-2 bg-primary/20 text-primary">{ticket.payment_status}</Badge>
+              <p className="text-sm">{ticket.payment_status === "approved" ? "Paiement approuvé. L’organisateur doit encore émettre le billet." : "Le billet sera disponible après approbation du paiement par l’administration et envoi par l’organisateur."}</p>
+              <Badge className="mt-2 bg-primary/20 text-primary">{ticket.payment_status === "approved" ? "En attente d’émission" : ticket.payment_status === "rejected" ? "Paiement refusé" : "Paiement en vérification"}</Badge>
             </div>
           )}
 

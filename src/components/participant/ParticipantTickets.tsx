@@ -27,6 +27,7 @@ export const ParticipantTickets = () => {
 
   const statusLabel = (t: any) => {
     if (t.validated) return "Utilisé";
+    if (t.payment_status === "approved" && !t.issued_at) return "Paiement approuvé · billet à envoyer";
     if (t.payment_status === "approved") return "Actif";
     if (t.payment_status === "rejected") return "Annulé";
     return "En attente";
@@ -63,11 +64,12 @@ export const ParticipantTickets = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-primary">{t.price} {t.currency}</span>
-                  {t.payment_status === "approved" && (
+                  {t.payment_status === "approved" && (t.issued_at || t.issued_at === undefined) && (
                     <Button size="sm" variant="outline" onClick={() => setViewTicket(t)} className="gap-1.5">
                       <QrCode size={14} /> QR Code
                     </Button>
                   )}
+                  {t.payment_status === "approved" && t.issued_at === null && <span className="text-xs text-muted-foreground">L’organisateur prépare votre billet.</span>}
                 </div>
               </CardContent>
             </Card>
