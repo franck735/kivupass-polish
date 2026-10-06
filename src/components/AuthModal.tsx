@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { resolveDashboardPath } from "@/lib/spaces";
 
 interface AuthModalProps {
@@ -102,14 +103,17 @@ const AuthModal = ({ open, tab, onClose, onTabChange }: AuthModalProps) => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/login` },
-      });
-      if (error) {
-        toast.error("Erreur Google : " + error.message);
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      if (result.error) {
+        toast.error("Erreur Google : " + result.error.message);
         setLoading(false);
+        return;
       }
+      if (result.redirected) return;
+      setLoading(false);
+      handleClose();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) await redirectAfterAuth(session.user.id);
     } catch (error) {
       setLoading(false);
       toast.error("Erreur Google : " + (error instanceof Error ? error.message : "connexion impossible."));
