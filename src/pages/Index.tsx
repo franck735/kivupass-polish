@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -10,15 +10,12 @@ import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
-import AuthModal from "@/components/AuthModal";
 
 const Index = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<"login" | "signup">("signup");
+  const navigate = useNavigate();
   const [eventSearch, setEventSearch] = useState("");
   const openModal = (tab: "login" | "signup") => {
-    setModalTab(tab);
-    setModalOpen(true);
+    navigate(tab === "signup" ? "/signup" : "/login");
   };
 
   return (
@@ -33,12 +30,6 @@ const Index = () => {
       <CTASection onOpenModal={openModal} />
       <ContactSection />
       <Footer />
-      <AuthModal
-        open={modalOpen}
-        tab={modalTab}
-        onClose={() => setModalOpen(false)}
-        onTabChange={setModalTab}
-      />
     </div>
   );
 };
