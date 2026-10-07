@@ -9,16 +9,24 @@ const ResetPassword = () => {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(true);
+  const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check for recovery type in URL hash
     const hash = window.location.hash;
-    if (!hash.includes("type=recovery")) {
-      // Not a valid recovery link — redirect home
-      navigate("/", { replace: true });
-    }
-  }, [navigate]);
+    setIsRecovery(hash.includes("type=recovery"));
+  }, []);
+
+  const sendLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+    setLoading(false);
+    if (error) toast.error(error.message);
+    else toast.success("Lien envoyé ! Vérifiez votre boîte e-mail.");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +53,16 @@ const ResetPassword = () => {
           Kivu<span className="text-primary">Pass</span>
         </div>
 
-        {done ? (
+        {!isRecovery ? (
+          <form onSubmit={sendLink}>
+            <p className="text-sm text-muted-foreground mb-6">Entrez votre e-mail : nous vous enverrons un lien pour choisir un nouveau mot de passe.</p>
+            <input type="email" placeholder="vous@exemple.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass + " mb-6"} required />
+            <button type="submit" disabled={loading} className="w-full py-4 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Envoyer le lien"}
+            </button>
+            <button type="button" onClick={() => navigate("/login")} className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground">Retour à la connexion</button>
+          </form>
+        ) : done ? (
           <div className="text-center space-y-4">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
             <p className="text-foreground font-semibold">Mot de passe mis à jour avec succès !</p>
