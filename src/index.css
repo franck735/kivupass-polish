@@ -68,7 +68,6 @@
 
   html, body {
     max-width: 100%;
-    overflow-x: hidden;
     overflow-x: clip;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -81,9 +80,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  img, video, svg, canvas, iframe { max-width: 100%; height: auto; }
-  table { max-width: 100%; }
-  h1, h2, h3, p, a, span, td { overflow-wrap: anywhere; }
+  img, video, canvas, iframe { max-width: 100%; height: auto; }
+  h1, h2, h3, p, a, td { overflow-wrap: break-word; }
+  .flex-1 { min-width: 0; }
+  aside.h-screen { height: 100dvh; }
+  main { min-width: 0; }
 
   @media (max-width: 768px) {
     input, select, textarea { font-size: 16px !important; }
