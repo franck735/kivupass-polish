@@ -1,3 +1,4 @@
+import ChangePasswordCard from "@/components/shared/ChangePasswordCard";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,7 @@ export const AdminSettings = () => {
           </Button>
         </CardContent>
       </Card>
+      <ChangePasswordCard />
     </div>
   );
 };

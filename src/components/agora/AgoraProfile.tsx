@@ -1,3 +1,4 @@
+import ChangePasswordCard from "@/components/shared/ChangePasswordCard";
 import { useEffect, useState } from "react";
 import { Loader2, Save } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -142,6 +143,7 @@ export const AgoraProfile = () => {
           </div>
         </CardContent>
       </Card>
+      <ChangePasswordCard />
       </div>
     </div>
   );
