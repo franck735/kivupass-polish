@@ -20,7 +20,7 @@ const Footer = () => (
       </div>
       <div className="mt-6 pt-6 border-t border-border flex flex-col md:flex-row md:items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
-          Goma · Bukavu · Kinshasa — République démocratique du Congo
+          Partout en République démocratique du Congo
         </p>
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} KivuPass. Tous droits réservés.
