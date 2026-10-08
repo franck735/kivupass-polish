@@ -57,7 +57,7 @@ export const OrganizerRequests = () => {
                     <p className="font-semibold text-foreground">Transaction</p>
                     <p className="text-sm text-muted-foreground">ID : {r.tx_ref || "—"}</p>
                     <p className="text-sm text-muted-foreground">Téléphone paiement : {r.org_pay_operator} {r.org_pay_phone}</p>
-                    <p className="text-sm text-muted-foreground">Frais de publication : {r.publication_fee_phone || "—"}</p>
+                    <p className="text-sm text-muted-foreground">Frais de publication : {r.pay_phone || "—"}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="font-semibold text-foreground">Statut</p>

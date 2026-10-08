@@ -72,8 +72,8 @@ export const AdminRequests = () => {
                   <p className="text-sm text-muted-foreground">{r.organizer_name || r.organizer_email}</p>
                   <p className="text-sm text-muted-foreground">{r.organizer_email}</p>
                   <p className="text-sm text-muted-foreground">Téléphone paiement : {r.org_pay_operator} {r.org_pay_phone}</p>
-                  {r.publication_fee_phone ? (
-                    <p className="text-sm text-muted-foreground">Frais de publication : {r.publication_fee_phone}</p>
+                  {r.pay_phone ? (
+                    <p className="text-sm text-muted-foreground">Frais de publication : {r.pay_phone}</p>
                   ) : null}
                 </div>
                 <div className="space-y-2">
