@@ -138,7 +138,7 @@ useEffect(() => {
       tx_ref: transactionId || null,
       proof_image: proofUrl,
       event_image: posterUrl,
-      publication_fee_phone: form.publication_fee_phone,
+      pay_phone: form.publication_fee_phone,
       status: "pending",
     });
 
